@@ -1,0 +1,1064 @@
+<!DOCTYPE HTML>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Integrado SisGen | Embrapa Amapá</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00563B;
+            --secondary-color: #00875A;
+            --accent-color: #0066CC;
+            --bg-color: #F4F6F8;
+            --card-bg: #FFFFFF;
+            --text-main: #222222;
+            --text-muted: #555555;
+            --border-color: #D1D5DB;
+            --warning-color: #D97706;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .upload-section {
+            background: var(--card-bg);
+            padding: 18px 24px;
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn-sync {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-sync:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .filter-section {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .filter-section {
+                padding: 20px;
+            }
+        }
+
+        .filter-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 8px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        @media (min-width: 600px) {
+            .filter-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .filter-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+            max-width: 100%;
+            background-color: #FFF;
+            box-sizing: border-box;
+            text-overflow: ellipsis;
+        }
+
+        @media (min-width: 768px) {
+            .filter-group input, .filter-group select {
+                font-size: 0.9rem;
+            }
+        }
+
+        .filter-group input:focus, .filter-group select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0,102, 204,0.15);
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .btn-clear {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            width: 100%;
+            margin-right: auto;
+        }
+
+        @media (min-width: 600px) {
+            .btn-clear {
+                width: auto;
+            }
+        }
+
+        .btn-clear:hover {
+            background-color: #E2E8F0;
+        }
+
+        .chart-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            height: auto;
+            position: relative;
+        }
+
+        .chart-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 360px;
+            width: 100%;
+        }
+
+        .results-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .results-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .cards-horizontal-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 0;
+            scroll-behavior: smooth;
+            align-items: flex-start;
+        }
+
+        .cards-horizontal-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .cards-horizontal-container::-webkit-scrollbar-track {
+            background: var(--bg-color);
+            border-radius: 4px;
+        }
+        .cards-horizontal-container::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .data-card {
+            flex: 0 0 280px;
+            align-self: flex-start;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 0;
+            height: auto;
+        }
+
+        @media (min-width: 480px) {
+            .data-card {
+                flex: 0 0 320px;
+            }
+        }
+
+        .data-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        .data-card .card-header-badge {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 0;
+        }
+
+        .data-card .code-badge {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+
+        .data-card .year-badge {
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .data-card .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .data-card .card-field {
+            line-height: 1.4;
+            margin-bottom: 0;
+        }
+
+        .data-card .card-field-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .data-card .card-title {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .no-results {
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .faq-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .faq-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .faq-card h3 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--bg-color);
+            padding-bottom: 8px;
+        }
+
+        .faq-card p, .faq-card ul {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .faq-card ul {
+            padding-left: 20px;
+        }
+
+        .faq-card li {
+            margin-bottom: 6px;
+        }
+
+        .faq-card a {
+            color: var(--accent-color);
+            text-decoration: underline;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png?utm_source=pt.wikipedia.org&utm_campaign=index&utm_content=original" 
+         alt="Marca Embrapa" 
+         class="logo-embrapa" 
+         style="width: 150px; height: auto; display: block; margin: 0 auto 20px auto;">
+    
+    <header>
+        <div>
+            <h1>Cadastros SisGen</h1>
+            <p>Embrapa Amapá</p>
+        </div>
+    </header>
+
+    <div class="upload-section">
+        <button class="btn-sync" onclick="syncGoogleSheets()">
+            🔄 Sincronizar 
+        </button>
+
+        <button class="btn-sync" style="background-color: var(--accent-color);" onclick="openFaqTab()">
+            Perguntas Frequentes
+        </button>
+
+        <span id="fileStatus" style="font-size: 0.9rem; color: var(--text-muted);">
+            
+        </span>
+    </div>
+
+    <!-- Conteúdo Principal Dashboard -->
+    <div id="mainDashboardView">
+        <div class="filter-section">
+            <h2>Filtros e Pesquisa</h2>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filterGeneral">Pesquisa Geral</label>
+                    <input type="text" id="filterGeneral" placeholder="Digite para buscar...">
+                </div>
+                <div class="filter-group">
+                    <label for="filterAno">Ano</label>
+                    <select id="filterAno">
+                        <option value="">Todos os Anos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterObjeto">Objeto</label>
+                    <select id="filterObjeto">
+                        <option value="">Todos os Objetos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-clear" onclick="clearFilters()">Limpar Pesquisa</button>
+            </div>
+        </div>
+
+        <!-- Gráfico de Rosca Integrado -->
+        <div class="chart-section">
+            <h2>Distribuição por Objeto de Acesso</h2>
+            <div class="chart-container">
+                <canvas id="chartRosca"></canvas>
+            </div>
+        </div>
+
+        <!-- Seção de Cards Sequenciais Laterais -->
+        <div class="results-section">
+            <h2>Registros Encontrados (<span id="resultsCount">0</span> exibidos)</h2>
+            <div class="cards-horizontal-container" id="cardsContainer">
+                <!-- Cards preenchidos via Script -->
+            </div>
+        </div>
+
+        <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
+            <p>&copy; Embrapa 2026 – Cadastros de Acessos ao Sisgen - App Desenvolvido por A.C.Góes</p>
+        </footer>
+    </div>
+
+    <!-- Conteúdo Aba Perguntas Frequentes -->
+    <div id="faqTabView" style="display: none;">
+        <div class="upload-section" style="margin-bottom: 20px;">
+            <button class="btn-sync" style="background-color: #555555;" onclick="closeFaqTab()">
+                ⬅️ Voltar ao Início 
+            </button>
+        </div>
+
+        <div class="faq-container">
+            <div class="faq-card">
+                <h3>1. O que é o SisGen e quem deve cadastrar suas atividades?</h3>
+                <p><strong>Conceito:</strong> O <strong>SisGen</strong> (Sistema Nacional de Gestão do Patrimônio Genético e do Conhecimento Tradicional Associado) é a plataforma eletrônica criada pela Lei nº 13.123/2015.</p>
+                <p><strong>Obrigatoriedade:</strong> Todo pesquisador ou equipe que realize atividades de acesso ao <strong>Patrimônio Genético (PG)</strong> brasileiro ou ao <strong>Conhecimento Tradicional Associado (CTA)</strong> deve obrigatoriamente cadastrar suas atividades na plataforma antes da divulgação dos resultados, remessa de amostras ou requerimento de direitos de propriedade industrial.</p>
+            </div>
+
+            <div class="faq-card">
+                <h3>2. Qual a diferença entre Acesso ao PG e Acesso ao CTA?</h3>
+                <p><strong>Acesso ao Patrimônio Genético (PG):</strong> Refere-se à pesquisa ou desenvolvimento tecnológico realizado sobre amostra de componente da biodiversidade brasileira (plantas, animais, microrganismos).</p>
+                <p><strong>Acesso ao Conhecimento Tradicional Associado (CTA):</strong> Refere-se à pesquisa ou desenvolvimento sobre informação ou prática de comunidade indígena, comunidade tradicional ou agricultor familiar referente às propriedades ou usos desse patrimônio genético.</p>
+            </div>
+
+            <div class="faq-card">
+                <h3>3. Quando deve ser feito o cadastro no SisGen?</h3>
+                <p><strong>Caráter Declaratório:</strong> O cadastro no SisGen é declaratório e deve ser realizado <strong>previamente</strong> a momentos específicos do projeto.</p>
+                <p><strong>Marcos Obrigatórios:</strong> Deve ser feito antes da remessa de amostras para o exterior, da divulgação de resultados (artigos, resumos, palestras), da solicitação de patentes/proteção de cultivares ou do licenciamento de produto derivado.</p>
+            </div>
+
+            <div class="faq-card">
+                <h3>4. Validade do Cadastro e Necessidade de Repetição</h3>
+                <p><strong>Regra Geral:</strong> O foco do cadastramento no SisGen é a atividade de pesquisa ou desenvolvimento tecnológico, não o ato isolado de coleta do material biológico.</p>
+                <p><strong>Pesquisas Plurianuais:</strong> Se o projeto original prevê coletas periódicas na mesma área e com a mesma espécie, o cadastro inicial é válido por todo o cronograma aprovado.</p>
+                <p><strong>Quando Exige Novo Cadastro:</strong></p>
+                <ul>
+                    <li>Mudança na finalidade da pesquisa (ex.: passagem de pesquisa básica para desenvolvimento de produto).</li>
+                    <li>Inclusão de uma nova espécie vegetal/biológica ao estudo.</li>
+                    <li>Alteração da instituição responsável pelo acesso ao patrimônio genético.</li>
+                </ul>
+            </div>
+
+            <div class="faq-card">
+                <h3>5. Quais os Papéis e Responsabilidade Legal no Sisgen?</h3>
+                <ul>
+                    <li><strong>Instituição (Embrapa):</strong> Responsável jurídica que responde legalmente perante órgãos reguladores (CGen).</li>
+                    <li><strong>Pesquisador e Analista:</strong> Responsáveis operacionais e técnicos encarregados de garantir a precisão dos dados.</li>
+                    <li><strong>Cadastrantes Designados:</strong> Responsáveis administrativos que inserem e atualizar as informações no SisGen.</li>
+                    <li><strong>Parcerias Internacionais:</strong> A responsabilidade fiel pelo cadastro permanece com a instituição nacional.</li>
+                </ul>
+            </div>
+
+            <div class="faq-card">
+                <h3>6. Todas as espécies devem ser cadastradas?</h3>
+                <p>Não. Apenas as espécies que integram o Patrimônio Genético (PG) brasileiro estão sujeitas às regras da Lei nº 13.123/2015.</p>
+                <p><strong>Espécies Exóticas / Introduzidas Convencionais:</strong> Pesquisas com espécies agrícolas exóticas convencionais (como café, soja, milho) estão isentas do sistema, conforme listas oficiais do MAPA/CGen.</p>
+                <p><strong>Links Úteis:</strong></p>
+                <ul>
+                    <li><a href="https://www.gov.br/agricultura/pt-br/assuntos/sustentabilidade/recursos-geneticos/lista-de-especies-introduzidas" target="_blank">Lista de Espécies Introduzidas (MAPA)</a></li>
+                    <li><a href="http://floradobrasil.jbrj.gov.br" target="_blank">Flora e Funga do Brasil (JBRJ)</a></li>
+                    <li><a href="http://fauna.jbrj.gov.br" target="_blank">Catálogo Taxonômico da Fauna do Brasil</a></li>
+                </ul>
+            </div>
+
+            <div class="faq-card">
+                <h3>7. Preciso cadastrar no Sisgen o estudo de micro-organismos em uma espécie exótica?</h3>
+                <p>Se a pesquisa analisa a microbiota associada a espécie exótica a partir de substratos no Brasil (solo, água, tecidos), o objeto real do acesso é o micro-organismo nacional. Deve-se declarar o micro-organismo como o PG acessado, informando a espécie exótica como fonte de isolamento.</p>
+            </div>
+
+            <div class="faq-card">
+                <h3>8. Como proceder com o cadastramento institucional na Embrapa Amapá?</h3>
+                <p><strong>Vinculação de Projetos:</strong> Cada projeto deve ser vinculado ao perfil oficial da Unidade.</p>
+                <p><strong>Trabalhos Acadêmicos e Estágios:</strong> Devem utilizar preferencialmente o cadastro do projeto guarda-chuva institucional ativo.</p>
+            </div>
+
+            <div class="faq-card">
+                <h3>9. Como registrar a manutenção e ampliação de coleções biológicas?</h3>
+                <p>As atividades de rotina para conservação, caracterização e documentação em coleções biológicas devem ser cadastradas como atividade de acesso ao PG.</p>
+            </div>
+
+            <div class="faq-card">
+                <h3>10. Amostras obtidas em feiras e mercados públicos exigem cadastro?</h3>
+                <p>Sim. O acesso a amostras vegetais ou sementes adquiridas em feiras livres configura acesso ao Patrimônio Genético e exige registro detalhado da origem e local da aquisição.</p>
+            </div>
+
+            <div class="faq-card">
+                <h3>11. Demais Perguntas Frequentes</h3>
+                <p>Para dúvidas complementares sobre Patrimônio Genético, acesse o portal do MMA:</p>
+                <p>👉 <a href="https://www.gov.br/mma/pt-br/assuntos/bioeconomia/patrimonio-genetico/perguntas-frequentes" target="_blank">Perguntas Frequentes - Patrimônio Genético (MMA)</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1dwph8Yrn0Ui2-AjfpJIzHspht7C2CognexrtQvJdI6c/gviz/tq?tqx=out:csv';
+
+        let rawRecords = [];
+        let chartRoscaInstance = null;
+
+        // Função de utilidade para remover acentos e normalizar buscas
+        function removeAccents(str) {
+            return String(str || '')
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase();
+        }
+
+        // Plugin customizado para desenhar o Total de Ativos no centro da Rosca
+        const centerTextPlugin = {
+            id: 'centerTextPlugin',
+            afterDraw(chart) {
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+                const { top, bottom, left, right } = chartArea;
+                
+                ctx.save();
+                const total = chart.config.options.plugins.centerText?.value ?? 0;
+
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Desenha o número total
+                ctx.font = 'bold 28px Roboto, sans-serif';
+                ctx.fillStyle = '#00563B';
+                ctx.fillText(total, centerX, centerY - 10);
+
+                // Desenha a legenda
+                ctx.font = '500 12px Roboto, sans-serif';
+                ctx.fillStyle = '#555555';
+                ctx.fillText('Total de Ativos', centerX, centerY + 14);
+
+                ctx.restore();
+            }
+        };
+
+        function openFaqTab() {
+            document.getElementById('mainDashboardView').style.display = 'none';
+            document.getElementById('faqTabView').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closeFaqTab() {
+            document.getElementById('faqTabView').style.display = 'none';
+            document.getElementById('mainDashboardView').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Leitor de CSV imune a quebras de linha e aspas internas
+        function parseCSV(text) {
+            const lines = [];
+            let row = [];
+            let inQuotes = false;
+            let currentVal = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentVal += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentVal.trim());
+                    currentVal = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') { i++; }
+                    row.push(currentVal.trim());
+                    if (row.some(cell => cell !== '')) lines.push(row);
+                    row = [];
+                    currentVal = '';
+                } else {
+                    currentVal += char;
+                }
+            }
+            if (currentVal || row.length > 0) {
+                row.push(currentVal.trim());
+                if (row.some(cell => cell !== '')) lines.push(row);
+            }
+            return lines;
+        }
+
+        // Localiza a linha do cabeçalho real avaliando a quantidade de colunas correspondentes
+        function findHeaderIndex(rows) {
+            const keywords = ['ano', 'cadastro', 'código', 'codigo', 'título', 'titulo', 'projeto', 'objeto', 'componente', 'procedência', 'procedencia', 'equipe', 'responsável', 'responsavel'];
+            let bestIndex = 0;
+            let maxScore = 0;
+
+            const maxSearch = Math.min(15, rows.length);
+            for (let i = 0; i < maxSearch; i++) {
+                const row = rows[i];
+                let score = 0;
+                row.forEach(cell => {
+                    const cleanCell = removeAccents(cell).trim();
+                    if (keywords.some(kw => cleanCell.includes(removeAccents(kw)))) {
+                        score++;
+                    }
+                });
+                if (score > maxScore && score >= 2) {
+                    maxScore = score;
+                    bestIndex = i;
+                }
+            }
+            return bestIndex;
+        }
+
+        // Mapeador avançado e seguro de colunas
+        function findColIndices(headers) {
+            const normHeaders = headers.map(h => removeAccents(h).trim());
+
+            function findMatch(targets, excludeSet = new Set()) {
+                for (let target of targets) {
+                    const normTarget = removeAccents(target);
+                    for (let i = 0; i < normHeaders.length; i++) {
+                        if (excludeSet.has(i)) continue;
+                        if (normHeaders[i] === normTarget) return i;
+                    }
+                }
+                for (let target of targets) {
+                    const normTarget = removeAccents(target);
+                    const regex = new RegExp(`\\b${normTarget}\\b`, 'i');
+                    for (let i = 0; i < normHeaders.length; i++) {
+                        if (excludeSet.has(i)) continue;
+                        if (regex.test(normHeaders[i])) return i;
+                    }
+                }
+                for (let target of targets) {
+                    const normTarget = removeAccents(target);
+                    for (let i = 0; i < normHeaders.length; i++) {
+                        if (excludeSet.has(i)) continue;
+                        if (normHeaders[i].includes(normTarget)) return i;
+                    }
+                }
+                return -1;
+            }
+
+            const anoTargets = ['ano cadastro', 'ano do cadastro', 'ano de cadastro', 'ano', 'data cadastro', 'data de cadastro', 'data/ano', 'ano_cadastro'];
+            const cadTargets = ['código do cadastro', 'codigo do cadastro', 'código de cadastro', 'codigo de cadastro', 'código sisgen', 'codigo sisgen', 'nº cadastro', 'nº do cadastro', 'numero cadastro', 'número cadastro', 'código', 'codigo', 'número', 'numero', 'cadastro sisgen', 'cadastro'];
+            const titTargets = ['título do projeto', 'titulo do projeto', 'título', 'titulo', 'projeto', 'nome do projeto'];
+            const objTargets = ['objeto do acesso', 'objeto de acesso', 'objeto'];
+            const compTargets = ['componente acessado', 'componente', 'espécie', 'especie', 'organismo'];
+            const procTargets = ['procedência', 'procedencia', 'origem', 'local de coleta'];
+            const eqpTargets = ['equipe', 'responsável', 'responsavel', 'pesquisador', 'autor', 'cadastrante'];
+
+            const idxAno = findMatch(anoTargets);
+            const excludeForCad = new Set();
+            if (idxAno !== -1) excludeForCad.add(idxAno);
+
+            const idxCad = findMatch(cadTargets, excludeForCad);
+            const idxTit = findMatch(titTargets);
+            const idxObj = findMatch(objTargets);
+            const idxComp = findMatch(compTargets);
+            const idxProc = findMatch(procTargets);
+            const idxEqp = findMatch(eqpTargets);
+
+            return { idxAno, idxCad, idxTit, idxObj, idxComp, idxProc, idxEqp };
+        }
+
+        // Detector de contingência para a coluna de Ano (2016-2030)
+        function detectAnoColFallback(dataRows) {
+            const colScores = {};
+            const yearRegex = /\b(201[6-9]|202[0-9]|203[0-0])\b/;
+
+            const sampleRows = dataRows.slice(0, 15);
+            sampleRows.forEach(row => {
+                row.forEach((cell, i) => {
+                    const val = String(cell).replace(/\./g, '').trim();
+                    if (yearRegex.test(val)) {
+                        colScores[i] = (colScores[i] || 0) + 1;
+                    }
+                });
+            });
+
+            let bestCol = -1;
+            let maxCount = 0;
+            for (let col in colScores) {
+                if (colScores[col] > maxCount) {
+                    maxCount = colScores[col];
+                    bestCol = parseInt(col, 10);
+                }
+            }
+            return bestCol;
+        }
+
+        // Extrai o ano em 4 dígitos
+        function extractAno(rawVal) {
+            if (!rawVal || rawVal === '-' || rawVal === 'null' || rawVal === 'undefined') return '-';
+
+            let str = String(rawVal).trim();
+
+            let match = str.match(/\b(19|20)\d{2}\b/);
+            if (match) return match[0];
+
+            let strNoDot = str.replace(/\./g, '').replace(/,/g, '');
+            let matchNoDot = strNoDot.match(/\b(19|20)\d{2}\b/);
+            if (matchNoDot) return matchNoDot[0];
+
+            let matchShort = str.match(/\/(1[6-9]|2[0-9])\b/);
+            if (matchShort) return "20" + matchShort[1];
+
+            if (/^(1[6-9]|2[0-9])$/.test(str)) return "20" + str;
+
+            return str;
+        }
+
+        function updateFilterOptions() {
+            const selectAno = document.getElementById('filterAno');
+            const selectObjeto = document.getElementById('filterObjeto');
+
+            const currentAno = selectAno.value;
+            const currentObjeto = selectObjeto.value;
+
+            const anos = [...new Set(
+                rawRecords
+                    .map(item => String(item.ano || '').trim())
+                    .filter(a => a && a !== '-' && a !== 'null' && a !== 'undefined')
+            )].sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+
+            selectAno.innerHTML = '<option value="">Todos os Anos</option>';
+            anos.forEach(ano => {
+                const opt = document.createElement('option');
+                opt.value = ano;
+                opt.textContent = ano;
+                selectAno.appendChild(opt);
+            });
+
+            if (anos.includes(currentAno)) {
+                selectAno.value = currentAno;
+            } else {
+                selectAno.value = "";
+            }
+
+            const objetos = [...new Set(
+                rawRecords
+                    .map(item => String(item.objeto || '').trim())
+                    .filter(o => o && o !== '-' && o !== 'null' && o !== 'undefined')
+            )].sort();
+
+            selectObjeto.innerHTML = '<option value="">Todos os Objetos</option>';
+            objetos.forEach(obj => {
+                const opt = document.createElement('option');
+                opt.value = obj;
+                opt.textContent = obj;
+                selectObjeto.appendChild(opt);
+            });
+
+            if (objetos.includes(currentObjeto)) {
+                selectObjeto.value = currentObjeto;
+            } else {
+                selectObjeto.value = "";
+            }
+
+            return anos;
+        }
+
+        // Função do Gráfico com Legenda posicionada ABAIXO do gráfico
+        function updateDoughnutChart(pg, cta, pgCta, remessa, envio, total) {
+            const canvas = document.getElementById('chartRosca');
+            if (!canvas) return;
+
+            if (chartRoscaInstance) {
+                chartRoscaInstance.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            
+            // Inserção dos quantitativos na legenda
+            const labels = [
+                `Patrimônio Genético (PG)= (${pg})`,
+                `Conhecimento Tradicional Associado (CTA)= (${cta})`,
+                `PG + CTA= (${pgCta})`,
+                `Remessa= (${remessa})`,
+                `Envio= (${envio})`
+            ];
+
+            chartRoscaInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: [pg, cta, pgCta, remessa, envio],
+                        backgroundColor: [
+                            '#00563B',  
+                            '#D97706', 
+                            '#0066CC',  
+                            '#00875A', 
+                            '#6B7280' 
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#FFFFFF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom', // Legenda posicionada na parte inferior
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: 'Roboto'
+                                },
+                                padding: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw || 0;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return ` Total: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        centerText: {
+                            value: total
+                        }
+                    },
+                    cutout: '65%'
+                },
+                plugins: [centerTextPlugin]
+            });
+        }
+
+        function updateDashboardChart(filteredData) {
+            let pg = 0, cta = 0, pgCta = 0, remessa = 0, envio = 0;
+
+            filteredData.forEach(item => {
+                const obj = removeAccents(item.objeto);
+                if (obj.includes('patrimonio genetico') && obj.includes('conhecimento tradicional')) {
+                    pgCta++;
+                } else if (obj.includes('patrimonio genetico') || obj.includes('pg')) {
+                    pg++;
+                } else if (obj.includes('conhecimento tradicional') || obj.includes('cta')) {
+                    cta++;
+                } else if (obj.includes('remessa')) {
+                    remessa++;
+                } else {
+                    envio++;
+                }
+            });
+
+            const total = filteredData.length;
+            updateDoughnutChart(pg, cta, pgCta, remessa, envio, total);
+        }
+
+        function applyFilters() {
+            // Normaliza a busca removendo acentuação e convertendo para minúsculas
+            const filterGeneral = removeAccents(document.getElementById('filterGeneral').value);
+            const filterAno = document.getElementById('filterAno').value;
+            const filterObjeto = document.getElementById('filterObjeto').value;
+
+            const filtered = rawRecords.filter(item => {
+                const matchesGeneral = !filterGeneral || 
+                    Object.values(item).some(val => removeAccents(val).includes(filterGeneral));
+                const matchesAno = !filterAno || String(item.ano) === String(filterAno);
+                const matchesObjeto = !filterObjeto || String(item.objeto) === String(filterObjeto);
+
+                return matchesGeneral && matchesAno && matchesObjeto;
+            });
+
+            renderCards(filtered);
+            updateDashboardChart(filtered);
+        }
+
+        function renderCards(records) {
+            const container = document.getElementById('cardsContainer');
+            const countSpan = document.getElementById('resultsCount');
+            if (countSpan) countSpan.textContent = records.length;
+
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (records.length === 0) {
+                container.innerHTML = '<div class="no-results">Nenhum registro encontrado para os filtros selecionados.</div>';
+                return;
+            }
+
+            records.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'data-card';
+                card.innerHTML = `
+                    <div class="card-header-badge">
+                        <span class="code-badge">${item.cadastro || 'Sem Código'}</span>
+                        <span class="year-badge">${item.ano || '-'}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-field">
+                            <span class="card-field-label">Título do Projeto</span>
+                            <div class="card-title">${item.titulo || '-'}</div>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Objeto de Acesso</span>
+                            <div>${item.objeto || '-'}</div>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Componente / Organismo</span>
+                            <div>${item.componente || '-'}</div>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Procedência / Origem</span>
+                            <div>${item.procedencia || '-'}</div>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Equipe / Responsável</span>
+                            <div>${item.equipe || '-'}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function syncGoogleSheets() {
+            const fileStatus = document.getElementById('fileStatus');
+            
+
+            fetch(GOOGLE_SHEETS_URL)
+                .then(response => response.text())
+                .then(csvText => {
+                    const rows = parseCSV(csvText);
+                    if (rows.length === 0) {
+                        if (fileStatus) fileStatus.textContent = 'Nenhum dado encontrado.';
+                        return;
+                    }
+
+                    const headerIdx = findHeaderIndex(rows);
+                    const headers = rows[headerIdx];
+                    const colIndices = findColIndices(headers);
+
+                    let idxAno = colIndices.idxAno;
+                    const dataRows = rows.slice(headerIdx + 1);
+
+                    if (idxAno === -1) {
+                        idxAno = detectAnoColFallback(dataRows);
+                    }
+
+                    rawRecords = dataRows.map(row => {
+                        const anoRaw = idxAno !== -1 ? row[idxAno] : '';
+                        return {
+                            ano: extractAno(anoRaw),
+                            cadastro: colIndices.idxCad !== -1 ? row[colIndices.idxCad] : '-',
+                            titulo: colIndices.idxTit !== -1 ? row[colIndices.idxTit] : '-',
+                            objeto: colIndices.idxObj !== -1 ? row[colIndices.idxObj] : '-',
+                            componente: colIndices.idxComp !== -1 ? row[colIndices.idxComp] : '-',
+                            procedencia: colIndices.idxProc !== -1 ? row[colIndices.idxProc] : '-',
+                            equipe: colIndices.idxEqp !== -1 ? row[colIndices.idxEqp] : '-'
+                        };
+                    }).filter(rec => rec.cadastro !== '-' || rec.titulo !== '-' || rec.objeto !== '-');
+
+                    updateFilterOptions();
+                    applyFilters();
+
+                   
+                })
+                .catch(err => {
+                    console.error(err);
+                    if (fileStatus) fileStatus.textContent = 'Erro ao carregar dados.';
+                });
+        }
+
+        function clearFilters() {
+            document.getElementById('filterGeneral').value = '';
+            document.getElementById('filterAno').value = '';
+            document.getElementById('filterObjeto').value = '';
+            applyFilters();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('filterGeneral').addEventListener('input', applyFilters);
+            document.getElementById('filterAno').addEventListener('change', applyFilters);
+            document.getElementById('filterObjeto').addEventListener('change', applyFilters);
+            
+            syncGoogleSheets();
+        });
+    </script>
+</body>
+</html>
