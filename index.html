@@ -250,14 +250,62 @@
             color: var(--primary-color);
         }
 
+        .cards-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .card-arrow {
+            position: absolute;
+            top: 15%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: background-color 0.2s, opacity 0.2s, transform 0.2s;
+            opacity: 0.9;
+        }
+
+        .card-arrow:hover {
+            background-color: var(--secondary-color);
+            opacity: 1;
+            transform: translateY(-50%) scale(1.08);
+        }
+
+        .arrow-left {
+            left: -12px;
+        }
+
+        .arrow-right {
+            right: -12px;
+        }
+
+        @media (max-width: 600px) {
+            .arrow-left { left: -6px; }
+            .arrow-right { right: -6px; }
+        }
+
         .cards-horizontal-container {
             display: flex;
             gap: 20px;
             overflow-x: auto;
-            padding-bottom: 12px;
+            padding: 10px 5px 12px 5px;
             margin-bottom: 0;
             scroll-behavior: smooth;
             align-items: flex-start;
+            width: 100%;
         }
 
         .cards-horizontal-container::-webkit-scrollbar {
@@ -427,9 +475,7 @@
             Perguntas Frequentes
         </button>
 
-        <span id="fileStatus" style="font-size: 0.9rem; color: var(--text-muted);">
-            
-        </span>
+        <span id="fileStatus" style="font-size: 0.9rem; color: var(--text-muted);"></span>
     </div>
 
     <!-- Conteúdo Principal Dashboard -->
@@ -467,11 +513,15 @@
             </div>
         </div>
 
-        <!-- Seção de Cards Sequenciais Laterais -->
+        <!-- Seção de Cards Sequenciais Laterais com Setas -->
         <div class="results-section">
-            <h2>Registros Encontrados (<span id="resultsCount">0</span> exibidos)</h2>
-            <div class="cards-horizontal-container" id="cardsContainer">
-                <!-- Cards preenchidos via Script -->
+            <h2>Registros Encontrados (<span id="resultsCount">0</span>)</h2>
+            <div class="cards-wrapper">
+                <button class="card-arrow arrow-left" onclick="scrollCards(-1)" aria-label="Anterior">&#10094;</button>
+                <div class="cards-horizontal-container" id="cardsContainer">
+                    <!-- Cards preenchidos via Script -->
+                </div>
+                <button class="card-arrow arrow-right" onclick="scrollCards(1)" aria-label="Próximo">&#10095;</button>
             </div>
         </div>
 
@@ -573,10 +623,22 @@
     <script>
         const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1dwph8Yrn0Ui2-AjfpJIzHspht7C2CognexrtQvJdI6c/gviz/tq?tqx=out:csv';
 
+        // Mapeamento direto por nome de objeto
+        const COLOR_MAP = {
+            'Acesso ao Patrimônio Genético': '#00563B',
+            'Patrimônio Genético': '#00563B',
+            'Conhecimento Tradicional Associado': '#D97706',
+            'Patrimônio Genético e Conhecimento Tradicional Associado': '#8B5CF6',
+            'Acesso ao Patrimônio Genético e Conhecimento Tradicional Associado': '#8B5CF6',
+            'Remessa': '#0066CC',
+            'Não Especificado': '#6B7280'
+        };
+
+        const DEFAULT_PALETTE = ['#14B8A6', '#EC4899', '#F59E0B', '#6366F1', '#10B981'];
+
         let rawRecords = [];
         let chartRoscaInstance = null;
 
-        // Função de utilidade para remover acentos e normalizar buscas
         function removeAccents(str) {
             return String(str || '')
                 .normalize("NFD")
@@ -584,7 +646,34 @@
                 .toLowerCase();
         }
 
-        // Plugin customizado para desenhar o Total de Ativos no centro da Rosca
+        // Função para garantir a cor exata independente de variações no texto
+        function getLabelColor(label, index) {
+            if (COLOR_MAP[label]) {
+                return COLOR_MAP[label];
+            }
+
+            const norm = removeAccents(label);
+            
+            // Caso seja a combinação de Patrimônio Genético + Conhecimento Tradicional
+            if (norm.includes('patrimonio') && norm.includes('tradicional')) {
+                return '#8B5CF6'; // Roxo
+            }
+            // Apenas Conhecimento Tradicional
+            if (norm.includes('tradicional')) {
+                return '#D97706'; // Laranja
+            }
+            // Apenas Patrimônio Genético
+            if (norm.includes('patrimonio') || norm.includes('genetico')) {
+                return '#00563B'; // Verde Escuro
+            }
+            // Remessa
+            if (norm.includes('remessa')) {
+                return '#0066CC'; // Azul
+            }
+
+            return DEFAULT_PALETTE[index % DEFAULT_PALETTE.length];
+        }
+
         const centerTextPlugin = {
             id: 'centerTextPlugin',
             afterDraw(chart) {
@@ -601,12 +690,10 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                // Desenha o número total
                 ctx.font = 'bold 28px Roboto, sans-serif';
                 ctx.fillStyle = '#00563B';
                 ctx.fillText(total, centerX, centerY - 10);
 
-                // Desenha a legenda
                 ctx.font = '500 12px Roboto, sans-serif';
                 ctx.fillStyle = '#555555';
                 ctx.fillText('Total de Ativos', centerX, centerY + 14);
@@ -627,7 +714,15 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Leitor de CSV imune a quebras de linha e aspas internas
+        function scrollCards(direction) {
+            const container = document.getElementById('cardsContainer');
+            const scrollAmount = 320;
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+
         function parseCSV(text) {
             const lines = [];
             let row = [];
@@ -665,7 +760,6 @@
             return lines;
         }
 
-        // Localiza a linha do cabeçalho real avaliando a quantidade de colunas correspondentes
         function findHeaderIndex(rows) {
             const keywords = ['ano', 'cadastro', 'código', 'codigo', 'título', 'titulo', 'projeto', 'objeto', 'componente', 'procedência', 'procedencia', 'equipe', 'responsável', 'responsavel'];
             let bestIndex = 0;
@@ -689,7 +783,6 @@
             return bestIndex;
         }
 
-        // Mapeador avançado e seguro de colunas
         function findColIndices(headers) {
             const normHeaders = headers.map(h => removeAccents(h).trim());
 
@@ -741,7 +834,6 @@
             return { idxAno, idxCad, idxTit, idxObj, idxComp, idxProc, idxEqp };
         }
 
-        // Detector de contingência para a coluna de Ano (2016-2030)
         function detectAnoColFallback(dataRows) {
             const colScores = {};
             const yearRegex = /\b(201[6-9]|202[0-9]|203[0-0])\b/;
@@ -767,7 +859,6 @@
             return bestCol;
         }
 
-        // Extrai o ano em 4 dígitos
         function extractAno(rawVal) {
             if (!rawVal || rawVal === '-' || rawVal === 'null' || rawVal === 'undefined') return '-';
 
@@ -838,211 +929,27 @@
             return anos;
         }
 
-        // Função do Gráfico com Legenda posicionada ABAIXO do gráfico
-        function updateDoughnutChart(pg, cta, pgCta, remessa, envio, total) {
-            const canvas = document.getElementById('chartRosca');
-            if (!canvas) return;
-
-            if (chartRoscaInstance) {
-                chartRoscaInstance.destroy();
-            }
-
-            const ctx = canvas.getContext('2d');
-            
-            // Inserção dos quantitativos na legenda
-            const labels = [
-                `Patrimônio Genético (PG)= (${pg})`,
-                `Conhecimento Tradicional Associado (CTA)= (${cta})`,
-                `PG + CTA= (${pgCta})`,
-                `Remessa= (${remessa})`,
-                `Envio= (${envio})`
-            ];
-
-            chartRoscaInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: [pg, cta, pgCta, remessa, envio],
-                        backgroundColor: [
-                            '#00563B',  
-                            '#D97706', 
-                            '#0066CC',  
-                            '#00875A', 
-                            '#6B7280' 
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#FFFFFF'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom', // Legenda posicionada na parte inferior
-                            labels: {
-                                font: {
-                                    size: 11,
-                                    family: 'Roboto'
-                                },
-                                padding: 12
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw || 0;
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return ` Total: ${value} (${percentage}%)`;
-                                }
-                            }
-                        },
-                        centerText: {
-                            value: total
-                        }
-                    },
-                    cutout: '65%'
-                },
-                plugins: [centerTextPlugin]
-            });
-        }
-
-        function updateDashboardChart(filteredData) {
-            let pg = 0, cta = 0, pgCta = 0, remessa = 0, envio = 0;
-
-            filteredData.forEach(item => {
-                const obj = removeAccents(item.objeto);
-                if (obj.includes('patrimonio genetico') && obj.includes('conhecimento tradicional')) {
-                    pgCta++;
-                } else if (obj.includes('patrimonio genetico') || obj.includes('pg')) {
-                    pg++;
-                } else if (obj.includes('conhecimento tradicional') || obj.includes('cta')) {
-                    cta++;
-                } else if (obj.includes('remessa')) {
-                    remessa++;
-                } else {
-                    envio++;
-                }
-            });
-
-            const total = filteredData.length;
-            updateDoughnutChart(pg, cta, pgCta, remessa, envio, total);
-        }
-
         function applyFilters() {
-            // Normaliza a busca removendo acentuação e convertendo para minúsculas
-            const filterGeneral = removeAccents(document.getElementById('filterGeneral').value);
-            const filterAno = document.getElementById('filterAno').value;
-            const filterObjeto = document.getElementById('filterObjeto').value;
+            const generalText = removeAccents(document.getElementById('filterGeneral').value);
+            const selectedAno = document.getElementById('filterAno').value;
+            const selectedObjeto = document.getElementById('filterObjeto').value;
 
             const filtered = rawRecords.filter(item => {
-                const matchesGeneral = !filterGeneral || 
-                    Object.values(item).some(val => removeAccents(val).includes(filterGeneral));
-                const matchesAno = !filterAno || String(item.ano) === String(filterAno);
-                const matchesObjeto = !filterObjeto || String(item.objeto) === String(filterObjeto);
+                if (selectedAno && String(item.ano).trim() !== selectedAno) return false;
+                if (selectedObjeto && String(item.objeto).trim() !== selectedObjeto) return false;
 
-                return matchesGeneral && matchesAno && matchesObjeto;
+                if (generalText) {
+                    const fullText = removeAccents([
+                        item.cad, item.ano, item.tit, item.obj, item.comp, item.proc, item.eqp
+                    ].join(' '));
+                    if (!fullText.includes(generalText)) return false;
+                }
+
+                return true;
             });
 
             renderCards(filtered);
-            updateDashboardChart(filtered);
-        }
-
-        function renderCards(records) {
-            const container = document.getElementById('cardsContainer');
-            const countSpan = document.getElementById('resultsCount');
-            if (countSpan) countSpan.textContent = records.length;
-
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (records.length === 0) {
-                container.innerHTML = '<div class="no-results">Nenhum registro encontrado para os filtros selecionados.</div>';
-                return;
-            }
-
-            records.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'data-card';
-                card.innerHTML = `
-                    <div class="card-header-badge">
-                        <span class="code-badge">${item.cadastro || 'Sem Código'}</span>
-                        <span class="year-badge">${item.ano || '-'}</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-field">
-                            <span class="card-field-label">Título do Projeto/Atividade</span>
-                            <div class="card-title">${item.titulo || '-'}</div>
-                        </div>
-                        <div class="card-field">
-                            <span class="card-field-label">Objeto de Acesso</span>
-                            <div>${item.objeto || '-'}</div>
-                        </div>
-                        <div class="card-field">
-                            <span class="card-field-label">Componente</span>
-                            <div>${item.componente || '-'}</div>
-                        </div>
-                        <div class="card-field">
-                            <span class="card-field-label">Procedência</span>
-                            <div>${item.procedencia || '-'}</div>
-                        </div>
-                        <div class="card-field">
-                            <span class="card-field-label">Equipe</span>
-                            <div>${item.equipe || '-'}</div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function syncGoogleSheets() {
-            const fileStatus = document.getElementById('fileStatus');
-            
-
-            fetch(GOOGLE_SHEETS_URL)
-                .then(response => response.text())
-                .then(csvText => {
-                    const rows = parseCSV(csvText);
-                    if (rows.length === 0) {
-                        if (fileStatus) fileStatus.textContent = 'Nenhum dado encontrado.';
-                        return;
-                    }
-
-                    const headerIdx = findHeaderIndex(rows);
-                    const headers = rows[headerIdx];
-                    const colIndices = findColIndices(headers);
-
-                    let idxAno = colIndices.idxAno;
-                    const dataRows = rows.slice(headerIdx + 1);
-
-                    if (idxAno === -1) {
-                        idxAno = detectAnoColFallback(dataRows);
-                    }
-
-                    rawRecords = dataRows.map(row => {
-                        const anoRaw = idxAno !== -1 ? row[idxAno] : '';
-                        return {
-                            ano: extractAno(anoRaw),
-                            cadastro: colIndices.idxCad !== -1 ? row[colIndices.idxCad] : '-',
-                            titulo: colIndices.idxTit !== -1 ? row[colIndices.idxTit] : '-',
-                            objeto: colIndices.idxObj !== -1 ? row[colIndices.idxObj] : '-',
-                            componente: colIndices.idxComp !== -1 ? row[colIndices.idxComp] : '-',
-                            procedencia: colIndices.idxProc !== -1 ? row[colIndices.idxProc] : '-',
-                            equipe: colIndices.idxEqp !== -1 ? row[colIndices.idxEqp] : '-'
-                        };
-                    }).filter(rec => rec.cadastro !== '-' || rec.titulo !== '-' || rec.objeto !== '-');
-
-                    updateFilterOptions();
-                    applyFilters();
-
-                   
-                })
-                .catch(err => {
-                    console.error(err);
-                    if (fileStatus) fileStatus.textContent = 'Erro ao carregar dados.';
-                });
+            renderChart(filtered);
         }
 
         function clearFilters() {
@@ -1052,11 +959,170 @@
             applyFilters();
         }
 
+        function renderCards(records) {
+            const container = document.getElementById('cardsContainer');
+            document.getElementById('resultsCount').textContent = records.length;
+
+            if (records.length === 0) {
+                container.innerHTML = '<div class="no-results">Nenhum registro encontrado para os filtros selecionados.</div>';
+                return;
+            }
+
+            container.innerHTML = records.map(item => `
+                <div class="data-card">
+                    <div class="card-header-badge">
+                        <span class="code-badge">${item.cad || 'S/N'}</span>
+                        <span class="year-badge">${item.ano || '-'}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-field">
+                            <span class="card-field-label">Título do Projeto</span>
+                            <span class="card-title">${item.tit || 'Não Informado'}</span>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Objeto de Acesso</span>
+                            <span>${item.obj || '-'}</span>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Componente / Espécie</span>
+                            <span>${item.comp || '-'}</span>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Procedência</span>
+                            <span>${item.proc || '-'}</span>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Equipe / Responsável</span>
+                            <span>${item.eqp || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderChart(records) {
+            const objCounts = {};
+            records.forEach(item => {
+                const label = item.objeto && item.objeto !== '-' ? item.objeto : 'Não Especificado';
+                objCounts[label] = (objCounts[label] || 0) + 1;
+            });
+
+            const labels = Object.keys(objCounts);
+            const dataValues = Object.values(objCounts);
+            const totalCount = records.length;
+
+            // Atribuição de cores usando a função de correspondência inteligente
+            const backgroundColors = labels.map((label, index) => getLabelColor(label, index));
+
+            const ctx = document.getElementById('chartRosca').getContext('2d');
+
+            if (chartRoscaInstance) {
+                chartRoscaInstance.destroy();
+            }
+
+            chartRoscaInstance = new Chart(ctx, {
+                type: 'doughnut',
+                plugins: [centerTextPlugin],
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            onClick: () => {}, 
+                            onHover: (event) => {
+                                if (event.native && event.native.target) {
+                                    event.native.target.style.cursor = 'default';
+                                }
+                            },
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const percentage = totalCount > 0 ? ((val / totalCount) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: ${val} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        centerText: {
+                            value: totalCount
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        async function syncGoogleSheets() {
+            const statusEl = document.getElementById('fileStatus');
+            statusEl.textContent = '⏳ Sincronizando dados...';
+
+            try {
+                const response = await fetch(GOOGLE_SHEETS_URL);
+                if (!response.ok) throw new Error('Erro ao acessar a planilha online');
+
+                const text = await response.text();
+                const rows = parseCSV(text);
+
+                if (rows.length < 2) {
+                    throw new Error('Planilha sem dados suficientes.');
+                }
+
+                const headerIdx = findHeaderIndex(rows);
+                const headers = rows[headerIdx];
+                const dataRows = rows.slice(headerIdx + 1);
+
+                let cols = findColIndices(headers);
+
+                if (cols.idxAno === -1) {
+                    cols.idxAno = detectAnoColFallback(dataRows);
+                }
+
+                rawRecords = dataRows.map(row => {
+                    return {
+                        ano: extractAno(cols.idxAno !== -1 ? row[cols.idxAno] : '-'),
+                        cad: cols.idxCad !== -1 ? row[cols.idxCad] : '-',
+                        tit: cols.idxTit !== -1 ? row[cols.idxTit] : '-',
+                        obj: cols.idxObj !== -1 ? row[cols.idxObj] : '-',
+                        comp: cols.idxComp !== -1 ? row[cols.idxComp] : '-',
+                        proc: cols.idxProc !== -1 ? row[cols.idxProc] : '-',
+                        eqp: cols.idxEqp !== -1 ? row[cols.idxEqp] : '-',
+                        objeto: cols.idxObj !== -1 ? row[cols.idxObj] : '-'
+                    };
+                });
+
+                updateFilterOptions();
+                applyFilters();
+
+                const now = new Date();
+                statusEl.textContent = `✅ Atualizado às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = '❌ Falha ao sincronizar dados.';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('filterGeneral').addEventListener('input', applyFilters);
             document.getElementById('filterAno').addEventListener('change', applyFilters);
             document.getElementById('filterObjeto').addEventListener('change', applyFilters);
-            
+
             syncGoogleSheets();
         });
     </script>
