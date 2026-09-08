@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Integrado SisGen | Embrapa Amapá</title>
 
-    <!-- Ícone Quadrado Proporcional com Margem (Favicon e Atalho Mobile) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23ffffff'/%3E%3Cimage href='https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png' x='64' y='140' width='384' height='232' preserveAspectRatio='xMidYMid meet'/%3E%3C/svg%3E">
-    <link id="appAppleIcon" rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23ffffff'/%3E%3Cimage href='https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png' x='64' y='140' width='384' height='232' preserveAspectRatio='xMidYMid meet'/%3E%3C/svg%3E">
+    <!-- Ícone Oficial para Navegador e Atalho Mobile (iOS/Android) -->
+    <link rel="icon" id="appIcon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png">
+    <link rel="apple-touch-icon" id="appAppleIcon" href="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -536,7 +536,7 @@
         </div>
 
         <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
-            <p>&copy; Embrapa 2026 – Cadastros de Acessos ao Sisgen - App Desenvolvido por A.C.Góes</p>
+            <p>&copy; Embrapa 2026 – Cadastros de Acessos ao Sisgen -               Desenvolvido por A.C.Góes</p>
         </footer>
     </div>
 
@@ -647,6 +647,42 @@
 
         let rawRecords = [];
         let chartRoscaInstance = null;
+
+        // Gerador Dinâmico de Ícone PNG Proporcional para Tela Inicial
+        function generateAppIcon() {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png';
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 180;
+                canvas.height = 180;
+                const ctx = canvas.getContext('2d');
+
+                // Fundo Branco Quadrado
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, 180, 180);
+
+                // Proporção e Centralização com Margem
+                const padding = 24;
+                const maxW = 180 - (padding * 2);
+                const maxH = 180 - (padding * 2);
+                const scale = Math.min(maxW / img.width, maxH / img.height);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                const x = (180 - w) / 2;
+                const y = (180 - h) / 2;
+
+                ctx.drawImage(img, x, y, w, h);
+
+                const iconUrl = canvas.toDataURL('image/png');
+                const appIcon = document.getElementById('appIcon');
+                const appAppleIcon = document.getElementById('appAppleIcon');
+                
+                if (appIcon) appIcon.href = iconUrl;
+                if (appAppleIcon) appAppleIcon.href = iconUrl;
+            };
+        }
 
         function removeAccents(str) {
             return String(str || '')
@@ -1122,6 +1158,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            generateAppIcon();
+
             document.getElementById('filterGeneral').addEventListener('input', applyFilters);
             document.getElementById('filterAno').addEventListener('change', applyFilters);
             document.getElementById('filterObjeto').addEventListener('change', applyFilters);
