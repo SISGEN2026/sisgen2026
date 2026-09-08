@@ -296,6 +296,7 @@
 
         .arrow-left {
             left: -12px;
+            display: none; /* Inicia oculta por padrão */
         }
 
         .arrow-right {
@@ -536,7 +537,7 @@
         </div>
 
         <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
-            <p>&copy; Embrapa 2026 – Cadastros de Acessos ao Sisgen -               Desenvolvido por A.C.Góes</p>
+            <p>&copy; Embrapa 2026 – Cadastros de Acessos ao Sisgen - App Desenvolvido por A.C.Góes</p>
         </footer>
     </div>
 
@@ -752,6 +753,29 @@
             document.getElementById('faqTabView').style.display = 'none';
             document.getElementById('mainDashboardView').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateArrowVisibility() {
+            const container = document.getElementById('cardsContainer');
+            const leftArrow = document.querySelector('.arrow-left');
+            const rightArrow = document.querySelector('.arrow-right');
+
+            if (!container || !leftArrow || !rightArrow) return;
+
+            // Esconde a seta esquerda se estiver no início (scrollLeft <= 10)
+            if (container.scrollLeft <= 10) {
+                leftArrow.style.display = 'none';
+            } else {
+                leftArrow.style.display = 'flex';
+            }
+
+            // Esconde a seta direita se atingiu o fim ou se não há rolagem
+            const maxScrollLeft = container.scrollWidth - container.clientWidth;
+            if (container.scrollLeft >= maxScrollLeft - 10 || container.scrollWidth <= container.clientWidth) {
+                rightArrow.style.display = 'none';
+            } else {
+                rightArrow.style.display = 'flex';
+            }
         }
 
         function scrollCards(direction) {
@@ -1005,6 +1029,7 @@
 
             if (records.length === 0) {
                 container.innerHTML = '<div class="no-results">Nenhum registro encontrado para os filtros selecionados.</div>';
+                updateArrowVisibility();
                 return;
             }
 
@@ -1016,7 +1041,7 @@
                     </div>
                     <div class="card-body">
                         <div class="card-field">
-                            <span class="card-field-label">Título do Projeto</span>
+                            <span class="card-field-label">Título do Projeto/Atividade</span>
                             <span class="card-title">${item.tit || 'Não Informado'}</span>
                         </div>
                         <div class="card-field">
@@ -1024,7 +1049,7 @@
                             <span>${item.obj || '-'}</span>
                         </div>
                         <div class="card-field">
-                            <span class="card-field-label">Componente / Espécie</span>
+                            <span class="card-field-label">Componente</span>
                             <span>${item.comp || '-'}</span>
                         </div>
                         <div class="card-field">
@@ -1032,12 +1057,16 @@
                             <span>${item.proc || '-'}</span>
                         </div>
                         <div class="card-field">
-                            <span class="card-field-label">Equipe / Responsável</span>
+                            <span class="card-field-label">Equipe</span>
                             <span>${item.eqp || '-'}</span>
                         </div>
                     </div>
                 </div>
             `).join('');
+
+            // Reposiciona o scroll no início e atualiza visibilidade das setas
+            container.scrollLeft = 0;
+            setTimeout(updateArrowVisibility, 50);
         }
 
         function renderChart(records) {
@@ -1159,6 +1188,12 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             generateAppIcon();
+
+            const cardsContainer = document.getElementById('cardsContainer');
+            if (cardsContainer) {
+                cardsContainer.addEventListener('scroll', updateArrowVisibility);
+            }
+            window.addEventListener('resize', updateArrowVisibility);
 
             document.getElementById('filterGeneral').addEventListener('input', applyFilters);
             document.getElementById('filterAno').addEventListener('change', applyFilters);
