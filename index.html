@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Integrado SisGen | Embrapa Amapá</title>
+
+    <!-- Ícone para Navegador e Atalho na Tela Inicial do Celular -->
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SisGen Embrapa">
+    <meta name="theme-color" content="#00563B">
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google Fonts -->
@@ -526,9 +535,7 @@
         </div>
 
         <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
-            <p>&copy; Embrapa 2026 -
-                Cadastros de Acessos ao Sisgen -
-                Desenvolvido por A.C.Góes</p>
+            <p>&copy; Embrapa 2026 – Cadastros de Acessos ao Sisgen -                       Desenvolvido por A.C.Góes</p>
         </footer>
     </div>
 
@@ -625,7 +632,6 @@
     <script>
         const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1dwph8Yrn0Ui2-AjfpJIzHspht7C2CognexrtQvJdI6c/gviz/tq?tqx=out:csv';
 
-        // Mapeamento direto por nome de objeto
         const COLOR_MAP = {
             'Acesso ao Patrimônio Genético': '#00563B',
             'Patrimônio Genético': '#00563B',
@@ -648,7 +654,6 @@
                 .toLowerCase();
         }
 
-        // Função para garantir a cor exata independente de variações no texto
         function getLabelColor(label, index) {
             if (COLOR_MAP[label]) {
                 return COLOR_MAP[label];
@@ -656,21 +661,17 @@
 
             const norm = removeAccents(label);
             
-            // Caso seja a combinação de Patrimônio Genético + Conhecimento Tradicional
             if (norm.includes('patrimonio') && norm.includes('tradicional')) {
-                return '#8B5CF6'; // Roxo
+                return '#8B5CF6';
             }
-            // Apenas Conhecimento Tradicional
             if (norm.includes('tradicional')) {
-                return '#D97706'; // Laranja
+                return '#D97706';
             }
-            // Apenas Patrimônio Genético
             if (norm.includes('patrimonio') || norm.includes('genetico')) {
-                return '#00563B'; // Verde Escuro
+                return '#00563B';
             }
-            // Remessa
             if (norm.includes('remessa')) {
-                return '#0066CC'; // Azul
+                return '#0066CC';
             }
 
             return DEFAULT_PALETTE[index % DEFAULT_PALETTE.length];
@@ -1013,7 +1014,6 @@
             const dataValues = Object.values(objCounts);
             const totalCount = records.length;
 
-            // Atribuição de cores usando a função de correspondência inteligente
             const backgroundColors = labels.map((label, index) => getLabelColor(label, index));
 
             const ctx = document.getElementById('chartRosca').getContext('2d');
