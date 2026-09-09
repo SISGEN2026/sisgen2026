@@ -1,9 +1,9 @@
 <!DOCTYPE HTML>
 <html lang="pt-BR">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SisGen Amapá</title>
+    <title>Painel Integrado SisGen | Embrapa Amapá</title>
 
     <!-- Ícone Oficial para Navegador e Atalho Mobile (iOS/Android) -->
     <link rel="icon" id="appIcon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png">
@@ -11,7 +11,7 @@
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="SisGen">
+    <meta name="apple-mobile-web-app-title" content="SisGen Embrapa">
     <meta name="theme-color" content="#00563B">
 
     <!-- Chart.js -->
@@ -520,7 +520,7 @@
 
         <!-- Gráfico de Rosca Integrado -->
         <div class="chart-section">
-            <h2>Distribuição por Objeto</h2>
+            <h2>Distribuição por Objeto de Acesso</h2>
             <div class="chart-container">
                 <canvas id="chartRosca"></canvas>
             </div>
@@ -539,7 +539,7 @@
         </div>
 
         <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
-            <p>&copy; Embrapa 2026. Cadastros Sisgen Amapá. ACGÓES</p>
+            <p>&copy; Embrapa 2026 – Cadastros de Acessos ao Sisgen - App Desenvolvido por A.C.Góes</p>
         </footer>
     </div>
 
@@ -640,8 +640,8 @@
             'Acesso ao Patrimônio Genético': '#00563B',
             'Patrimônio Genético': '#00563B',
             'Conhecimento Tradicional Associado': '#D97706',
-            'Patrimônio Genético e Conhecimento Tradicional Associado': '#A020F0',
-            'Acesso ao Patrimônio Genético e Conhecimento Tradicional Associado': '#A020F0',
+            'Patrimônio Genético e Conhecimento Tradicional Associado': '#8B5CF6',
+            'Acesso ao Patrimônio Genético e Conhecimento Tradicional Associado': '#8B5CF6',
             'Remessa': '#0066CC',
             'Não Especificado': '#6B7280'
         };
@@ -1052,15 +1052,15 @@
                     </div>
                     <div class="card-body">
                         <div class="card-field">
-                            <span class="card-field-label">Título do Projeto/Atividade</span>
+                            <span class="card-field-label">Título do Projeto</span>
                             <span class="card-title">${item.tit || 'Não Informado'}</span>
                         </div>
                         <div class="card-field">
-                            <span class="card-field-label">Objeto</span>
+                            <span class="card-field-label">Objeto de Acesso</span>
                             <span>${item.obj || '-'}</span>
                         </div>
                         <div class="card-field">
-                            <span class="card-field-label">Componente</span>
+                            <span class="card-field-label">Componente / Espécie</span>
                             <span>${item.comp || '-'}</span>
                         </div>
                         <div class="card-field">
@@ -1068,7 +1068,7 @@
                             <span>${item.proc || '-'}</span>
                         </div>
                         <div class="card-field">
-                            <span class="card-field-label">Equipe</span>
+                            <span class="card-field-label">Equipe / Responsável</span>
                             <span>${item.eqp || '-'}</span>
                         </div>
                     </div>
