@@ -269,7 +269,7 @@
 
         .card-arrow {
             position: absolute;
-            top: 15%;
+            top: 9%;
             transform: translateY(-50%);
             z-index: 10;
             background-color: var(--primary-color);
@@ -303,9 +303,11 @@
             right: -12px;
         }
 
-        @media (max-width: 600px) {
-            .arrow-left { left: -6px; }
-            .arrow-right { right: -6px; }
+        /* Desativa as setas em dispositivos móveis e tablets pequenos */
+        @media (max-width: 768px) {
+            .card-arrow {
+                display: none !important;
+            }
         }
 
         .cards-horizontal-container {
@@ -756,6 +758,15 @@
         }
 
         function updateArrowVisibility() {
+            // Em dispositivos móveis / telas menores (<= 768px), não exibe as setas
+            if (window.innerWidth <= 768) {
+                const leftArrow = document.querySelector('.arrow-left');
+                const rightArrow = document.querySelector('.arrow-right');
+                if (leftArrow) leftArrow.style.display = 'none';
+                if (rightArrow) rightArrow.style.display = 'none';
+                return;
+            }
+
             const container = document.getElementById('cardsContainer');
             const leftArrow = document.querySelector('.arrow-left');
             const rightArrow = document.querySelector('.arrow-right');
