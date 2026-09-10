@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SisGen Amapá</title>
 
-    <!-- Ícone Oficial para Navegador e Atalho Mobile (iOS/Android) -->
     <link rel="icon" id="appIcon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png">
     <link rel="apple-touch-icon" id="appAppleIcon" href="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png">
 
@@ -14,9 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="SisGen">
     <meta name="theme-color" content="#00563B">
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -507,7 +504,6 @@
         <span id="fileStatus" style="font-size: 0.9rem; color: var(--text-muted);"></span>
     </div>
 
-    <!-- Conteúdo Principal Dashboard -->
     <div id="mainDashboardView">
         <div class="filter-section">
             <h2>Filtros e Pesquisa</h2>
@@ -534,7 +530,6 @@
             </div>
         </div>
 
-        <!-- Contêiner Unificado (Gráfico + Cards Lado a Lado) -->
         <div class="dashboard-grid">
             <div class="chart-section">
                 <h2>Distribuição por Objeto</h2>
@@ -544,7 +539,7 @@
             </div>
 
             <div class="results-section">
-                <h2>Deslocamento Lateral --> (<span id="resultsCount">0</span>) Registros</h2>
+                <h2>Deslocamento Lateral --&gt; (<span id="resultsCount">0</span>) Registros</h2>
                 <div class="cards-wrapper">
                     <button class="card-arrow arrow-left" onclick="scrollCards(-1)" aria-label="Anterior">&#10094;</button>
                     <div class="cards-horizontal-container" id="cardsContainer">
@@ -556,11 +551,10 @@
         </div>
 
         <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
-            <p>&copy; Embrapa 2026. Cadastros Sisgen Amapá. ACGÓES</p>
+            <p>&copy; Embrapa 2026. Cadastros Sisgen Amapá. ACGOES</p>
         </footer>
     </div>
 
-    <!-- Conteúdo Aba Perguntas Frequentes -->
     <div id="faqTabView" style="display: none;">
         <div class="upload-section" style="margin-bottom: 20px;">
             <button class="btn-sync" style="background-color: #555555;" onclick="closeFaqTab()">
@@ -766,7 +760,7 @@
                 const { top, bottom, left, right } = chartArea;
 
                 ctx.save();
-                const total = chart.config.options.plugins.centerText?.value ?? 0;
+                const total = chart.config.options.plugins.centerTextPlugin?.value ?? chart.config.options.plugins.centerText?.value ?? 0;
 
                 const centerX = (left + right) / 2;
                 const centerY = (top + bottom) / 2;
@@ -885,272 +879,157 @@
                 let score = 0;
                 row.forEach(cell => {
                     const cleanCell = removeAccents(cell).trim();
-                    if (/\b(ano|cadastro|codigo|titulo|projeto|objeto|componente|procedencia|equipe|responsavel)\b/i.test(cleanCell)) {
+                    if (/\b(ano|cadastro|codigo|objeto|titulo|projeto|atividade|componente|procedencia|equipe|responsavel)\b/.test(cleanCell)) {
                         score++;
                     }
                 });
-
-                if (score > maxScore && score >= 2) {
+                if (score > maxScore) {
                     maxScore = score;
                     bestIndex = i;
                 }
             }
-
             return bestIndex;
         }
 
-        function findColIndices(headers) {
-            const normHeaders = headers.map(h => removeAccents(h).trim());
-            const usedIndices = new Set();
+        function processCSVData(rows) {
+            if (!rows || rows.length === 0) return [];
 
-            function findMatchByRegex(regexList) {
-                for (let regex of regexList) {
-                    for (let i = 0; i < normHeaders.length; i++) {
-                        if (!usedIndices.has(i) && regex.test(normHeaders[i])) {
-                            usedIndices.add(i);
-                            return i;
-                        }
-                    }
-                }
-                return -1;
+            const headerIdx = findHeaderIndex(rows);
+            const headers = rows[headerIdx].map(h => removeAccents(h).trim());
+
+            let codeCol = headers.findIndex(h => /\b(codigo|cadastro|numero|n°|id)\b/.test(h));
+            let yearCol = headers.findIndex(h => /\b(ano|data)\b/.test(h));
+            let projCol = headers.findIndex(h => /\b(projeto|atividade|titulo|nome|descricao)\b/.test(h));
+            let objCol = headers.findIndex(h => /\b(objeto|tipo|categoria|modalidade)\b/.test(h));
+            let compCol = headers.findIndex(h => /\b(componente|especie|taxon|amostra)\b/.test(h));
+            let procCol = headers.findIndex(h => /\b(procedencia|origem|local|municipio)\b/.test(h));
+            let equipeCol = headers.findIndex(h => /\b(equipe|responsavel|pesquisador|autor|coordenador|membros)\b/.test(h));
+
+            if (codeCol === -1) codeCol = 0;
+            if (projCol === -1) projCol = 1;
+            if (objCol === -1) objCol = 2;
+
+            const records = [];
+
+            for (let i = headerIdx + 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length === 0 || row.every(c => !c.trim())) continue;
+
+                const code = row[codeCol] || `CAD-${i}`;
+                const rawYear = yearCol !== -1 ? row[yearCol] : '';
+                const year = extractYear(rawYear, row);
+                const projetoAtividade = projCol !== -1 ? row[projCol] : '';
+                const objeto = objCol !== -1 ? row[objCol] : 'Não Especificado';
+                const componente = compCol !== -1 ? row[compCol] : '';
+                const procedencia = procCol !== -1 ? row[procCol] : '';
+                const equipe = equipeCol !== -1 ? row[equipeCol] : '';
+
+                records.push({
+                    code,
+                    year,
+                    projetoAtividade,
+                    objeto,
+                    componente,
+                    procedencia,
+                    equipe,
+                    fullText: removeAccents(row.join(' '))
+                });
             }
 
-            const idxAno = findMatchByRegex([
-                /\bano\b/i,
-                /\bdata\b/i,
-                /\byear\b/i,
-                /\bdate\b/i
-            ]);
-
-            const idxCodigo = findMatchByRegex([
-                /\b(codigo|código)\b/i,
-                /\bcadastro\b/i,
-                /\bsisgen\b/i,
-                /\bnumero\b/i,
-                /\bnúmero\b/i,
-                /\bid\b/i
-            ]);
-
-            const idxTitulo = findMatchByRegex([
-                /\btitulo\b/i,
-                /\btítulo\b/i,
-                /\bprojeto\b/i,
-                /\batividade\b/i,
-                /\bnome\b/i,
-                /\bdescricao\b/i,
-                /\bdescrição\b/i
-            ]);
-
-            const idxObjeto = findMatchByRegex([
-                /\bobjeto\b/i,
-                /\bacesso\b/i,
-                /\btipo\b/i
-            ]);
-
-            const idxComponente = findMatchByRegex([
-                /\bcomponente\b/i,
-                /\bespecie\b/i,
-                /\bespécie\b/i,
-                /\btaxon\b/i
-            ]);
-
-            const idxProcedencia = findMatchByRegex([
-                /\bprocedencia\b/i,
-                /\bprocedência\b/i,
-                /\borigem\b/i,
-                /\blocal\b/i,
-                /\binstituicao\b/i,
-                /\binstituição\b/i
-            ]);
-
-            const idxEquipe = findMatchByRegex([
-                /\bequipe\b/i,
-                /\bresponsavel\b/i,
-                /\bresponsável\b/i,
-                /\bpesquisador\b/i,
-                /\bautores\b/i,
-                /\bcadastrante\b/i
-            ]);
-
-            return { idxAno, idxCodigo, idxTitulo, idxObjeto, idxComponente, idxProcedencia, idxEquipe };
+            return records;
         }
 
-        async function syncGoogleSheets() {
-            const statusEl = document.getElementById('fileStatus');
-            if (statusEl) statusEl.textContent = 'Carregando registros...';
-
-            try {
-                const response = await fetch(GOOGLE_SHEETS_URL);
-                if (!response.ok) throw new Error('Falha na requisição HTTP.');
-                const csvText = await response.text();
-
-                const rows = parseCSV(csvText);
-                if (!rows || rows.length === 0) throw new Error('Dados vazios ou inválidos.');
-
-                const headerIdx = findHeaderIndex(rows);
-                const headers = rows[headerIdx];
-                const cols = findColIndices(headers);
-
-                rawRecords = [];
-                for (let i = headerIdx + 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row || row.length === 0 || row.every(c => !c)) continue;
-
-                    const rawAnoVal = cols.idxAno !== -1 ? row[cols.idxAno] : '';
-                    const extractedAno = extractYear(rawAnoVal, row);
-
-                    const record = {
-                        ano: extractedAno,
-                        codigo: cols.idxCodigo !== -1 ? (row[cols.idxCodigo] || 'N/A') : (row[1] || 'N/A'),
-                        titulo: cols.idxTitulo !== -1 ? (row[cols.idxTitulo] || 'Sem Título') : (row[2] || 'Sem Título'),
-                        objeto: cols.idxObjeto !== -1 ? (row[cols.idxObjeto] || 'Não Especificado') : (row[3] || 'Não Especificado'),
-                        componente: cols.idxComponente !== -1 ? (row[cols.idxComponente] || '-') : '-',
-                        procedencia: cols.idxProcedencia !== -1 ? (row[cols.idxProcedencia] || '-') : (row[5] || '-'),
-                        equipe: cols.idxEquipe !== -1 ? (row[cols.idxEquipe] || '-') : (row[4] || '-')
-                    };
-
-                    rawRecords.push(record);
-                }
-
-                const now = new Date();
-                if (statusEl) {
-                    statusEl.textContent = `✅ Atualizado às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-                }
-
-                populateFilters(rawRecords);
-                applyFiltersAndRender();
-            } catch (err) {
-                console.error(err);
-                if (statusEl) {
-                    statusEl.textContent = '❌ Falha ao sincronizar dados.';
-                }
-            }
-        }
-
-        function populateFilters(records) {
+        function populateSelects(records) {
             const anoSelect = document.getElementById('filterAno');
-            const objSelect = document.getElementById('filterObjeto');
-            if (!anoSelect || !objSelect) return;
+            const objetoSelect = document.getElementById('filterObjeto');
+
+            const years = [...new Set(records.map(r => r.year))].filter(y => y && y !== 'N/A').sort((a, b) => b - a);
+            const objetos = [...new Set(records.map(r => r.objeto))].filter(Boolean).sort();
 
             const currentAno = anoSelect.value;
-            const currentObj = objSelect.value;
-
-            const anos = new Set();
-            const objetos = new Set();
-
-            records.forEach(r => {
-                if (r.ano && r.ano !== 'N/A') anos.add(r.ano);
-                if (r.objeto && r.objeto !== 'Não Especificado') objetos.add(r.objeto);
-            });
-
-            const sortedAnos = Array.from(anos).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-            const sortedObjetos = Array.from(objetos).sort((a, b) => a.localeCompare(b));
+            const currentObjeto = objetoSelect.value;
 
             anoSelect.innerHTML = '<option value="">Todos os Anos</option>' + 
-                sortedAnos.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+                years.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join('');
 
-            objSelect.innerHTML = '<option value="">Todos os Objetos</option>' + 
-                sortedObjetos.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+            objetoSelect.innerHTML = '<option value="">Todos os Objetos</option>' + 
+                objetos.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
 
             anoSelect.value = currentAno;
-            objSelect.value = currentObj;
-        }
-
-        function applyFiltersAndRender() {
-            const generalVal = removeAccents(document.getElementById('filterGeneral')?.value || '');
-            const anoVal = document.getElementById('filterAno')?.value || '';
-            const objVal = document.getElementById('filterObjeto')?.value || '';
-
-            const filtered = rawRecords.filter(rec => {
-                if (anoVal && rec.ano !== anoVal) return false;
-                if (objVal && rec.objeto !== objVal) return false;
-
-                if (generalVal) {
-                    const haystack = removeAccents(`${rec.codigo} ${rec.ano} ${rec.titulo} ${rec.objeto} ${rec.componente} ${rec.procedencia} ${rec.equipe}`);
-                    if (!haystack.includes(generalVal)) return false;
-                }
-
-                return true;
-            });
-
-            renderCards(filtered);
-            renderChart(filtered);
+            objetoSelect.value = currentObjeto;
         }
 
         function renderCards(records) {
             const container = document.getElementById('cardsContainer');
-            const countEl = document.getElementById('resultsCount');
-
-            if (countEl) countEl.textContent = records.length;
             if (!container) return;
 
-            if (!records || records.length === 0) {
+            if (records.length === 0) {
                 container.innerHTML = '<div class="no-results">Nenhum registro encontrado com os filtros selecionados.</div>';
-                updateArrowVisibility();
                 return;
             }
 
-            container.innerHTML = records.map(rec => `
-                <div class="data-card">
-                    <div class="card-header-badge">
-                        <span class="code-badge">${escapeHtml(rec.codigo)}</span>
-                        <span class="year-badge">${escapeHtml(rec.ano)}</span>
-                    </div>
-                    <div class="card-body">
-                        <!-- 1. TÍTULO -->
-                        <div class="card-field">
-                            <span class="card-field-label">Projeto/Atividade</span>
-                            <span class="card-title">${escapeHtml(rec.titulo)}</span>
+            container.innerHTML = records.map(rec => {
+                const color = getLabelColor(rec.objeto, 0);
+                return `
+                    <div class="data-card" style="border-top-color: ${color};">
+                        <div class="card-header-badge">
+                            <span class="code-badge" style="color: ${color};">${escapeHtml(rec.code)}</span>
+                            <span class="year-badge" style="background-color: ${color};">${escapeHtml(rec.year)}</span>
                         </div>
-                        <!-- 2. OBJETO -->
-                        <div class="card-field">
-                            <span class="card-field-label">Objeto</span>
-                            <div>${escapeHtml(rec.objeto)}</div>
-                        </div>
-                        <!-- 3. COMPONENTE -->
-                        ${rec.componente && rec.componente !== '-' ? `
-                        <div class="card-field">
-                            <span class="card-field-label">Componente</span>
-                            <div>${escapeHtml(rec.componente)}</div>
-                        </div>` : ''}
-                        <!-- 4. PROCEDÊNCIA -->
-                        ${rec.procedencia && rec.procedencia !== '-' ? `
-                        <div class="card-field">
-                            <span class="card-field-label">Procedência</span>
-                            <div>${escapeHtml(rec.procedencia)}</div>
-                        </div>` : ''}
-                        <!-- 5. EQUIPE -->
-                        ${rec.equipe && rec.equipe !== '-' ? `
-                        <div class="card-field">
-                            <span class="card-field-label">Equipe</span>
-                            <div>${escapeHtml(rec.equipe)}</div>
-                        </div>` : ''}
-                    </div>
-                </div>
-            `).join('');
+                        <div class="card-body">
+                            ${rec.projetoAtividade ? `
+                            <div class="card-field">
+                                <span class="card-field-label">PROJETO/ATIVIDADE</span>
+                                <div class="card-title">${escapeHtml(rec.projetoAtividade)}</div>
+                            </div>` : ''}
 
-            setTimeout(updateArrowVisibility, 50);
+                            ${rec.objeto ? `
+                            <div class="card-field">
+                                <span class="card-field-label">OBJETO</span>
+                                <div>${escapeHtml(rec.objeto)}</div>
+                            </div>` : ''}
+
+                            ${rec.componente ? `
+                            <div class="card-field">
+                                <span class="card-field-label">COMPONENTE</span>
+                                <div>${escapeHtml(rec.componente)}</div>
+                            </div>` : ''}
+
+                            ${rec.procedencia ? `
+                            <div class="card-field">
+                                <span class="card-field-label">PROCEDÊNCIA</span>
+                                <div>${escapeHtml(rec.procedencia)}</div>
+                            </div>` : ''}
+
+                            ${rec.equipe ? `
+                            <div class="card-field">
+                                <span class="card-field-label">EQUIPE</span>
+                                <div>${escapeHtml(rec.equipe)}</div>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function renderChart(records) {
-            const canvas = document.getElementById('chartRosca');
-            if (!canvas) return;
+        function updateChart(records) {
+            const ctx = document.getElementById('chartRosca');
+            if (!ctx) return;
 
-            const counts = {};
+            const countsByObjeto = {};
             records.forEach(r => {
                 const obj = r.objeto || 'Não Especificado';
-                counts[obj] = (counts[obj] || 0) + 1;
+                countsByObjeto[obj] = (countsByObjeto[obj] || 0) + 1;
             });
 
-            const labels = Object.keys(counts);
-            const data = Object.values(counts);
-            const bgColors = labels.map((l, idx) => getLabelColor(l, idx));
+            const labels = Object.keys(countsByObjeto);
+            const data = Object.values(countsByObjeto);
+            const bgColors = labels.map((label, idx) => getLabelColor(label, idx));
 
             if (chartRoscaInstance) {
                 chartRoscaInstance.destroy();
             }
 
-            const ctx = canvas.getContext('2d');
             chartRoscaInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -1168,13 +1047,20 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            onClick: null, // <-- Desabilita a ação de clique na legenda
+                            onClick: null,
                             labels: {
                                 boxWidth: 12,
-                                font: { size: 11 }
+                                font: { size: 11, family: 'Roboto' },
+                                padding: 10
                             }
                         },
+                        tooltip: {
+                            enabled: false
+                        },
                         centerText: {
+                            value: records.length
+                        },
+                        centerTextPlugin: {
                             value: records.length
                         }
                     },
@@ -1184,36 +1070,67 @@
             });
         }
 
+        function applyFilters() {
+            const term = removeAccents(document.getElementById('filterGeneral').value);
+            const selectedAno = document.getElementById('filterAno').value;
+            const selectedObjeto = document.getElementById('filterObjeto').value;
+
+            const filtered = rawRecords.filter(rec => {
+                const matchesTerm = !term || rec.fullText.includes(term);
+                const matchesAno = !selectedAno || rec.year === selectedAno;
+                const matchesObjeto = !selectedObjeto || rec.objeto === selectedObjeto;
+
+                return matchesTerm && matchesAno && matchesObjeto;
+            });
+
+            document.getElementById('resultsCount').textContent = filtered.length;
+            renderCards(filtered);
+            updateChart(filtered);
+            setTimeout(updateArrowVisibility, 100);
+        }
+
         function clearFilters() {
-            const genInput = document.getElementById('filterGeneral');
-            const anoSelect = document.getElementById('filterAno');
-            const objSelect = document.getElementById('filterObjeto');
+            document.getElementById('filterGeneral').value = '';
+            document.getElementById('filterAno').value = '';
+            document.getElementById('filterObjeto').value = '';
+            applyFilters();
+        }
 
-            if (genInput) genInput.value = '';
-            if (anoSelect) anoSelect.value = '';
-            if (objSelect) objSelect.value = '';
+        async function syncGoogleSheets() {
+            const statusEl = document.getElementById('fileStatus');
+            if (statusEl) statusEl.textContent = '';
 
-            applyFiltersAndRender();
+            try {
+                const response = await fetch(GOOGLE_SHEETS_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                const rows = parseCSV(text);
+                
+                rawRecords = processCSVData(rows);
+                populateSelects(rawRecords);
+                applyFilters();
+
+                if (statusEl) statusEl.textContent = ``;
+            } catch (err) {
+                console.error('Erro ao buscar dados:', err);
+                if (statusEl) statusEl.textContent = '⚠️ Erro ao carregar planilha.';
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             generateAppIcon();
-            syncGoogleSheets();
 
-            const genInput = document.getElementById('filterGeneral');
-            const anoSelect = document.getElementById('filterAno');
-            const objSelect = document.getElementById('filterObjeto');
-
-            if (genInput) genInput.addEventListener('input', applyFiltersAndRender);
-            if (anoSelect) anoSelect.addEventListener('change', applyFiltersAndRender);
-            if (objSelect) objSelect.addEventListener('change', applyFiltersAndRender);
+            document.getElementById('filterGeneral').addEventListener('input', applyFilters);
+            document.getElementById('filterAno').addEventListener('change', applyFilters);
+            document.getElementById('filterObjeto').addEventListener('change', applyFilters);
 
             const cardsContainer = document.getElementById('cardsContainer');
             if (cardsContainer) {
                 cardsContainer.addEventListener('scroll', updateArrowVisibility);
             }
-
             window.addEventListener('resize', updateArrowVisibility);
+
+            syncGoogleSheets();
         });
     </script>
 </body>
