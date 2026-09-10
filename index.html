@@ -190,7 +190,7 @@
 
         .filter-group input:focus, .filter-group select:focus {
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(0,102, 204,0.15);
+            box-shadow: 0 0 0 2px rgba(0,102,204,0.15);
         }
 
         .filter-actions {
@@ -223,14 +223,30 @@
             background-color: #E2E8F0;
         }
 
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        @media (min-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 360px 1fr;
+                align-items: start;
+            }
+        }
+
         .chart-section {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-            height: auto;
+            margin-bottom: 0;
+            height: 100%;
             position: relative;
+            min-width: 0;
         }
 
         .chart-section h2 {
@@ -241,7 +257,7 @@
 
         .chart-container {
             position: relative;
-            height: 360px;
+            height: 340px;
             width: 100%;
         }
 
@@ -250,8 +266,9 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            height: auto;
-            margin-bottom: 20px;
+            height: 100%;
+            margin-bottom: 0;
+            min-width: 0;
         }
 
         .results-section h2 {
@@ -296,14 +313,13 @@
 
         .arrow-left {
             left: -12px;
-            display: none; /* Inicia oculta por padrão */
+            display: none;
         }
 
         .arrow-right {
             right: -12px;
         }
 
-        /* Desativa as setas em dispositivos móveis e tablets pequenos */
         @media (max-width: 768px) {
             .card-arrow {
                 display: none !important;
@@ -467,9 +483,9 @@
     </style>
 </head>
 <body>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png?utm_source=pt.wikipedia.org&utm_campaign=index&utm_content=original" 
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Embrapa_-_Marca.png?utm_source=pt.wikipedia.org&utm_campaign=index&utm_content=original"
          alt="Marca Embrapa" 
-         class="logo-embrapa" 
+         class="logo-embrapa"
          style="width: 150px; height: auto; display: block; margin: 0 auto 20px auto;">
     
     <header>
@@ -518,23 +534,24 @@
             </div>
         </div>
 
-        <!-- Gráfico de Rosca Integrado -->
-        <div class="chart-section">
-            <h2>Distribuição por Objeto de Acesso</h2>
-            <div class="chart-container">
-                <canvas id="chartRosca"></canvas>
-            </div>
-        </div>
-
-        <!-- Seção de Cards Sequenciais Laterais com Setas -->
-        <div class="results-section">
-            <h2>Registros Encontrados (<span id="resultsCount">0</span>)</h2>
-            <div class="cards-wrapper">
-                <button class="card-arrow arrow-left" onclick="scrollCards(-1)" aria-label="Anterior">&#10094;</button>
-                <div class="cards-horizontal-container" id="cardsContainer">
-                    <!-- Cards preenchidos via Script -->
+        <!-- Contêiner Unificado (Gráfico + Cards Lado a Lado) -->
+        <div class="dashboard-grid">
+            <div class="chart-section">
+                <h2>Distribuição por Objeto</h2>
+                <div class="chart-container">
+                    <canvas id="chartRosca"></canvas>
                 </div>
-                <button class="card-arrow arrow-right" onclick="scrollCards(1)" aria-label="Próximo">&#10095;</button>
+            </div>
+
+            <div class="results-section">
+                <h2>Registros Encontrados (<span id="resultsCount">0</span>)</h2>
+                <div class="cards-wrapper">
+                    <button class="card-arrow arrow-left" onclick="scrollCards(-1)" aria-label="Anterior">&#10094;</button>
+                    <div class="cards-horizontal-container" id="cardsContainer">
+                        <!-- Cards preenchidos via Script -->
+                    </div>
+                    <button class="card-arrow arrow-right" onclick="scrollCards(1)" aria-label="Próximo">&#10095;</button>
+                </div>
             </div>
         </div>
 
@@ -547,7 +564,7 @@
     <div id="faqTabView" style="display: none;">
         <div class="upload-section" style="margin-bottom: 20px;">
             <button class="btn-sync" style="background-color: #555555;" onclick="closeFaqTab()">
-                ⬅️ Voltar ao Início 
+                ⬅️ Voltar ao Início
             </button>
         </div>
 
@@ -651,7 +668,16 @@
         let rawRecords = [];
         let chartRoscaInstance = null;
 
-        // Gerador Dinâmico de Ícone PNG Proporcional para Tela Inicial
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         function generateAppIcon() {
             const img = new Image();
             img.crossOrigin = 'anonymous';
@@ -662,11 +688,9 @@
                 canvas.height = 180;
                 const ctx = canvas.getContext('2d');
 
-                // Fundo Branco Quadrado
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, 180, 180);
 
-                // Proporção e Centralização com Margem
                 const padding = 24;
                 const maxW = 180 - (padding * 2);
                 const maxH = 180 - (padding * 2);
@@ -681,7 +705,7 @@
                 const iconUrl = canvas.toDataURL('image/png');
                 const appIcon = document.getElementById('appIcon');
                 const appAppleIcon = document.getElementById('appAppleIcon');
-                
+
                 if (appIcon) appIcon.href = iconUrl;
                 if (appAppleIcon) appAppleIcon.href = iconUrl;
             };
@@ -694,13 +718,30 @@
                 .toLowerCase();
         }
 
+        function extractYear(val, rowObj) {
+            if (val) {
+                const str = String(val).trim();
+                const match = str.match(/\b(19\d{2}|20\d{2})\b/);
+                if (match) return match[1];
+            }
+            
+            if (rowObj && Array.isArray(rowObj)) {
+                for (let cell of rowObj) {
+                    if (!cell) continue;
+                    const m = String(cell).match(/\b(199\d|20[0-2]\d)\b/);
+                    if (m) return m[1];
+                }
+            }
+            return 'N/A';
+        }
+
         function getLabelColor(label, index) {
             if (COLOR_MAP[label]) {
                 return COLOR_MAP[label];
             }
 
             const norm = removeAccents(label);
-            
+
             if (norm.includes('patrimonio') && norm.includes('tradicional')) {
                 return '#8B5CF6';
             }
@@ -723,7 +764,7 @@
                 const { ctx, chartArea } = chart;
                 if (!chartArea) return;
                 const { top, bottom, left, right } = chartArea;
-                
+
                 ctx.save();
                 const total = chart.config.options.plugins.centerText?.value ?? 0;
 
@@ -733,7 +774,7 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                ctx.font = 'bold 28px Roboto, sans-serif';
+                ctx.font = 'bold 26px Roboto, sans-serif';
                 ctx.fillStyle = '#00563B';
                 ctx.fillText(total, centerX, centerY - 10);
 
@@ -758,7 +799,6 @@
         }
 
         function updateArrowVisibility() {
-            // Em dispositivos móveis / telas menores (<= 768px), não exibe as setas
             if (window.innerWidth <= 768) {
                 const leftArrow = document.querySelector('.arrow-left');
                 const rightArrow = document.querySelector('.arrow-right');
@@ -773,14 +813,12 @@
 
             if (!container || !leftArrow || !rightArrow) return;
 
-            // Esconde a seta esquerda se estiver no início (scrollLeft <= 10)
             if (container.scrollLeft <= 10) {
                 leftArrow.style.display = 'none';
             } else {
                 leftArrow.style.display = 'flex';
             }
 
-            // Esconde a seta direita se atingiu o fim ou se não há rolagem
             const maxScrollLeft = container.scrollWidth - container.clientWidth;
             if (container.scrollLeft >= maxScrollLeft - 10 || container.scrollWidth <= container.clientWidth) {
                 rightArrow.style.display = 'none';
@@ -828,196 +866,208 @@
                     currentVal += char;
                 }
             }
+
             if (currentVal || row.length > 0) {
                 row.push(currentVal.trim());
                 if (row.some(cell => cell !== '')) lines.push(row);
             }
+
             return lines;
         }
 
         function findHeaderIndex(rows) {
-            const keywords = ['ano', 'cadastro', 'código', 'codigo', 'título', 'titulo', 'projeto', 'objeto', 'componente', 'procedência', 'procedencia', 'equipe', 'responsável', 'responsavel'];
+            const maxSearch = Math.min(15, rows.length);
             let bestIndex = 0;
             let maxScore = 0;
 
-            const maxSearch = Math.min(15, rows.length);
             for (let i = 0; i < maxSearch; i++) {
                 const row = rows[i];
                 let score = 0;
                 row.forEach(cell => {
                     const cleanCell = removeAccents(cell).trim();
-                    if (keywords.some(kw => cleanCell.includes(removeAccents(kw)))) {
+                    if (/\b(ano|cadastro|codigo|titulo|projeto|objeto|componente|procedencia|equipe|responsavel)\b/i.test(cleanCell)) {
                         score++;
                     }
                 });
+
                 if (score > maxScore && score >= 2) {
                     maxScore = score;
                     bestIndex = i;
                 }
             }
+
             return bestIndex;
         }
 
         function findColIndices(headers) {
             const normHeaders = headers.map(h => removeAccents(h).trim());
+            const usedIndices = new Set();
 
-            function findMatch(targets, excludeSet = new Set()) {
-                for (let target of targets) {
-                    const normTarget = removeAccents(target);
+            function findMatchByRegex(regexList) {
+                for (let regex of regexList) {
                     for (let i = 0; i < normHeaders.length; i++) {
-                        if (excludeSet.has(i)) continue;
-                        if (normHeaders[i] === normTarget) return i;
-                    }
-                }
-                for (let target of targets) {
-                    const normTarget = removeAccents(target);
-                    const regex = new RegExp(`\\b${normTarget}\\b`, 'i');
-                    for (let i = 0; i < normHeaders.length; i++) {
-                        if (excludeSet.has(i)) continue;
-                        if (regex.test(normHeaders[i])) return i;
-                    }
-                }
-                for (let target of targets) {
-                    const normTarget = removeAccents(target);
-                    for (let i = 0; i < normHeaders.length; i++) {
-                        if (excludeSet.has(i)) continue;
-                        if (normHeaders[i].includes(normTarget)) return i;
+                        if (!usedIndices.has(i) && regex.test(normHeaders[i])) {
+                            usedIndices.add(i);
+                            return i;
+                        }
                     }
                 }
                 return -1;
             }
 
-            const anoTargets = ['ano cadastro', 'ano do cadastro', 'ano de cadastro', 'ano', 'data cadastro', 'data de cadastro', 'data/ano', 'ano_cadastro'];
-            const cadTargets = ['código do cadastro', 'codigo do cadastro', 'código de cadastro', 'codigo de cadastro', 'código sisgen', 'codigo sisgen', 'nº cadastro', 'nº do cadastro', 'numero cadastro', 'número cadastro', 'código', 'codigo', 'número', 'numero', 'cadastro sisgen', 'cadastro'];
-            const titTargets = ['título do projeto', 'titulo do projeto', 'título', 'titulo', 'projeto', 'nome do projeto'];
-            const objTargets = ['objeto do acesso', 'objeto de acesso', 'objeto'];
-            const compTargets = ['componente acessado', 'componente', 'espécie', 'especie', 'organismo'];
-            const procTargets = ['procedência', 'procedencia', 'origem', 'local de coleta'];
-            const eqpTargets = ['equipe', 'responsável', 'responsavel', 'pesquisador', 'autor', 'cadastrante'];
+            const idxAno = findMatchByRegex([
+                /\bano\b/i,
+                /\bdata\b/i,
+                /\byear\b/i,
+                /\bdate\b/i
+            ]);
 
-            const idxAno = findMatch(anoTargets);
-            const excludeForCad = new Set();
-            if (idxAno !== -1) excludeForCad.add(idxAno);
+            const idxCodigo = findMatchByRegex([
+                /\b(codigo|código)\b/i,
+                /\bcadastro\b/i,
+                /\bsisgen\b/i,
+                /\bnumero\b/i,
+                /\bnúmero\b/i,
+                /\bid\b/i
+            ]);
 
-            const idxCad = findMatch(cadTargets, excludeForCad);
-            const idxTit = findMatch(titTargets);
-            const idxObj = findMatch(objTargets);
-            const idxComp = findMatch(compTargets);
-            const idxProc = findMatch(procTargets);
-            const idxEqp = findMatch(eqpTargets);
+            const idxTitulo = findMatchByRegex([
+                /\btitulo\b/i,
+                /\btítulo\b/i,
+                /\bprojeto\b/i,
+                /\batividade\b/i,
+                /\bnome\b/i,
+                /\bdescricao\b/i,
+                /\bdescrição\b/i
+            ]);
 
-            return { idxAno, idxCad, idxTit, idxObj, idxComp, idxProc, idxEqp };
+            const idxObjeto = findMatchByRegex([
+                /\bobjeto\b/i,
+                /\bacesso\b/i,
+                /\btipo\b/i
+            ]);
+
+            const idxComponente = findMatchByRegex([
+                /\bcomponente\b/i,
+                /\bespecie\b/i,
+                /\bespécie\b/i,
+                /\btaxon\b/i
+            ]);
+
+            const idxProcedencia = findMatchByRegex([
+                /\bprocedencia\b/i,
+                /\bprocedência\b/i,
+                /\borigem\b/i,
+                /\blocal\b/i,
+                /\binstituicao\b/i,
+                /\binstituição\b/i
+            ]);
+
+            const idxEquipe = findMatchByRegex([
+                /\bequipe\b/i,
+                /\bresponsavel\b/i,
+                /\bresponsável\b/i,
+                /\bpesquisador\b/i,
+                /\bautores\b/i,
+                /\bcadastrante\b/i
+            ]);
+
+            return { idxAno, idxCodigo, idxTitulo, idxObjeto, idxComponente, idxProcedencia, idxEquipe };
         }
 
-        function detectAnoColFallback(dataRows) {
-            const colScores = {};
-            const yearRegex = /\b(201[6-9]|202[0-9]|203[0-0])\b/;
+        async function syncGoogleSheets() {
+            const statusEl = document.getElementById('fileStatus');
+            if (statusEl) statusEl.textContent = 'Carregando registros...';
 
-            const sampleRows = dataRows.slice(0, 15);
-            sampleRows.forEach(row => {
-                row.forEach((cell, i) => {
-                    const val = String(cell).replace(/\./g, '').trim();
-                    if (yearRegex.test(val)) {
-                        colScores[i] = (colScores[i] || 0) + 1;
-                    }
-                });
-            });
+            try {
+                const response = await fetch(GOOGLE_SHEETS_URL);
+                if (!response.ok) throw new Error('Falha na requisição HTTP.');
+                const csvText = await response.text();
 
-            let bestCol = -1;
-            let maxCount = 0;
-            for (let col in colScores) {
-                if (colScores[col] > maxCount) {
-                    maxCount = colScores[col];
-                    bestCol = parseInt(col, 10);
+                const rows = parseCSV(csvText);
+                if (!rows || rows.length === 0) throw new Error('Dados vazios ou inválidos.');
+
+                const headerIdx = findHeaderIndex(rows);
+                const headers = rows[headerIdx];
+                const cols = findColIndices(headers);
+
+                rawRecords = [];
+                for (let i = headerIdx + 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length === 0 || row.every(c => !c)) continue;
+
+                    const rawAnoVal = cols.idxAno !== -1 ? row[cols.idxAno] : '';
+                    const extractedAno = extractYear(rawAnoVal, row);
+
+                    const record = {
+                        ano: extractedAno,
+                        codigo: cols.idxCodigo !== -1 ? (row[cols.idxCodigo] || 'N/A') : (row[1] || 'N/A'),
+                        titulo: cols.idxTitulo !== -1 ? (row[cols.idxTitulo] || 'Sem Título') : (row[2] || 'Sem Título'),
+                        objeto: cols.idxObjeto !== -1 ? (row[cols.idxObjeto] || 'Não Especificado') : (row[3] || 'Não Especificado'),
+                        componente: cols.idxComponente !== -1 ? (row[cols.idxComponente] || '-') : '-',
+                        procedencia: cols.idxProcedencia !== -1 ? (row[cols.idxProcedencia] || '-') : (row[5] || '-'),
+                        equipe: cols.idxEquipe !== -1 ? (row[cols.idxEquipe] || '-') : (row[4] || '-')
+                    };
+
+                    rawRecords.push(record);
+                }
+
+                const now = new Date();
+                if (statusEl) {
+                    statusEl.textContent = `✅ Atualizado às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                }
+
+                populateFilters(rawRecords);
+                applyFiltersAndRender();
+            } catch (err) {
+                console.error(err);
+                if (statusEl) {
+                    statusEl.textContent = '❌ Falha ao sincronizar dados.';
                 }
             }
-            return bestCol;
         }
 
-        function extractAno(rawVal) {
-            if (!rawVal || rawVal === '-' || rawVal === 'null' || rawVal === 'undefined') return '-';
+        function populateFilters(records) {
+            const anoSelect = document.getElementById('filterAno');
+            const objSelect = document.getElementById('filterObjeto');
+            if (!anoSelect || !objSelect) return;
 
-            let str = String(rawVal).trim();
+            const currentAno = anoSelect.value;
+            const currentObj = objSelect.value;
 
-            let match = str.match(/\b(19|20)\d{2}\b/);
-            if (match) return match[0];
+            const anos = new Set();
+            const objetos = new Set();
 
-            let strNoDot = str.replace(/\./g, '').replace(/,/g, '');
-            let matchNoDot = strNoDot.match(/\b(19|20)\d{2}\b/);
-            if (matchNoDot) return matchNoDot[0];
-
-            let matchShort = str.match(/\/(1[6-9]|2[0-9])\b/);
-            if (matchShort) return "20" + matchShort[1];
-
-            if (/^(1[6-9]|2[0-9])$/.test(str)) return "20" + str;
-
-            return str;
-        }
-
-        function updateFilterOptions() {
-            const selectAno = document.getElementById('filterAno');
-            const selectObjeto = document.getElementById('filterObjeto');
-
-            const currentAno = selectAno.value;
-            const currentObjeto = selectObjeto.value;
-
-            const anos = [...new Set(
-                rawRecords
-                    .map(item => String(item.ano || '').trim())
-                    .filter(a => a && a !== '-' && a !== 'null' && a !== 'undefined')
-            )].sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-
-            selectAno.innerHTML = '<option value="">Todos os Anos</option>';
-            anos.forEach(ano => {
-                const opt = document.createElement('option');
-                opt.value = ano;
-                opt.textContent = ano;
-                selectAno.appendChild(opt);
+            records.forEach(r => {
+                if (r.ano && r.ano !== 'N/A') anos.add(r.ano);
+                if (r.objeto && r.objeto !== 'Não Especificado') objetos.add(r.objeto);
             });
 
-            if (anos.includes(currentAno)) {
-                selectAno.value = currentAno;
-            } else {
-                selectAno.value = "";
-            }
+            const sortedAnos = Array.from(anos).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+            const sortedObjetos = Array.from(objetos).sort((a, b) => a.localeCompare(b));
 
-            const objetos = [...new Set(
-                rawRecords
-                    .map(item => String(item.objeto || '').trim())
-                    .filter(o => o && o !== '-' && o !== 'null' && o !== 'undefined')
-            )].sort();
+            anoSelect.innerHTML = '<option value="">Todos os Anos</option>' + 
+                sortedAnos.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
 
-            selectObjeto.innerHTML = '<option value="">Todos os Objetos</option>';
-            objetos.forEach(obj => {
-                const opt = document.createElement('option');
-                opt.value = obj;
-                opt.textContent = obj;
-                selectObjeto.appendChild(opt);
-            });
+            objSelect.innerHTML = '<option value="">Todos os Objetos</option>' + 
+                sortedObjetos.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
 
-            if (objetos.includes(currentObjeto)) {
-                selectObjeto.value = currentObjeto;
-            } else {
-                selectObjeto.value = "";
-            }
-
-            return anos;
+            anoSelect.value = currentAno;
+            objSelect.value = currentObj;
         }
 
-        function applyFilters() {
-            const generalText = removeAccents(document.getElementById('filterGeneral').value);
-            const selectedAno = document.getElementById('filterAno').value;
-            const selectedObjeto = document.getElementById('filterObjeto').value;
+        function applyFiltersAndRender() {
+            const generalVal = removeAccents(document.getElementById('filterGeneral')?.value || '');
+            const anoVal = document.getElementById('filterAno')?.value || '';
+            const objVal = document.getElementById('filterObjeto')?.value || '';
 
-            const filtered = rawRecords.filter(item => {
-                if (selectedAno && String(item.ano).trim() !== selectedAno) return false;
-                if (selectedObjeto && String(item.objeto).trim() !== selectedObjeto) return false;
+            const filtered = rawRecords.filter(rec => {
+                if (anoVal && rec.ano !== anoVal) return false;
+                if (objVal && rec.objeto !== objVal) return false;
 
-                if (generalText) {
-                    const fullText = removeAccents([
-                        item.cad, item.ano, item.tit, item.obj, item.comp, item.proc, item.eqp
-                    ].join(' '));
-                    if (!fullText.includes(generalText)) return false;
+                if (generalVal) {
+                    const haystack = removeAccents(`${rec.codigo} ${rec.ano} ${rec.titulo} ${rec.objeto} ${rec.componente} ${rec.procedencia} ${rec.equipe}`);
+                    if (!haystack.includes(generalVal)) return false;
                 }
 
                 return true;
@@ -1027,88 +1077,89 @@
             renderChart(filtered);
         }
 
-        function clearFilters() {
-            document.getElementById('filterGeneral').value = '';
-            document.getElementById('filterAno').value = '';
-            document.getElementById('filterObjeto').value = '';
-            applyFilters();
-        }
-
         function renderCards(records) {
             const container = document.getElementById('cardsContainer');
-            document.getElementById('resultsCount').textContent = records.length;
+            const countEl = document.getElementById('resultsCount');
 
-            if (records.length === 0) {
-                container.innerHTML = '<div class="no-results">Nenhum registro encontrado para os filtros selecionados.</div>';
+            if (countEl) countEl.textContent = records.length;
+            if (!container) return;
+
+            if (!records || records.length === 0) {
+                container.innerHTML = '<div class="no-results">Nenhum registro encontrado com os filtros selecionados.</div>';
                 updateArrowVisibility();
                 return;
             }
 
-            container.innerHTML = records.map(item => `
+            container.innerHTML = records.map(rec => `
                 <div class="data-card">
                     <div class="card-header-badge">
-                        <span class="code-badge">${item.cad || 'S/N'}</span>
-                        <span class="year-badge">${item.ano || '-'}</span>
+                        <span class="code-badge">${escapeHtml(rec.codigo)}</span>
+                        <span class="year-badge">${escapeHtml(rec.ano)}</span>
                     </div>
                     <div class="card-body">
+                        <!-- 1. TÍTULO -->
                         <div class="card-field">
-                            <span class="card-field-label">Título do Projeto</span>
-                            <span class="card-title">${item.tit || 'Não Informado'}</span>
+                            <span class="card-field-label">Projeto/Atividade</span>
+                            <span class="card-title">${escapeHtml(rec.titulo)}</span>
                         </div>
+                        <!-- 2. OBJETO -->
                         <div class="card-field">
-                            <span class="card-field-label">Objeto de Acesso</span>
-                            <span>${item.obj || '-'}</span>
+                            <span class="card-field-label">Objeto</span>
+                            <div>${escapeHtml(rec.objeto)}</div>
                         </div>
+                        <!-- 3. COMPONENTE -->
+                        ${rec.componente && rec.componente !== '-' ? `
                         <div class="card-field">
-                            <span class="card-field-label">Componente / Espécie</span>
-                            <span>${item.comp || '-'}</span>
-                        </div>
+                            <span class="card-field-label">Componente</span>
+                            <div>${escapeHtml(rec.componente)}</div>
+                        </div>` : ''}
+                        <!-- 4. PROCEDÊNCIA -->
+                        ${rec.procedencia && rec.procedencia !== '-' ? `
                         <div class="card-field">
                             <span class="card-field-label">Procedência</span>
-                            <span>${item.proc || '-'}</span>
-                        </div>
+                            <div>${escapeHtml(rec.procedencia)}</div>
+                        </div>` : ''}
+                        <!-- 5. EQUIPE -->
+                        ${rec.equipe && rec.equipe !== '-' ? `
                         <div class="card-field">
-                            <span class="card-field-label">Equipe / Responsável</span>
-                            <span>${item.eqp || '-'}</span>
-                        </div>
+                            <span class="card-field-label">Equipe</span>
+                            <div>${escapeHtml(rec.equipe)}</div>
+                        </div>` : ''}
                     </div>
                 </div>
             `).join('');
 
-            // Reposiciona o scroll no início e atualiza visibilidade das setas
-            container.scrollLeft = 0;
             setTimeout(updateArrowVisibility, 50);
         }
 
         function renderChart(records) {
-            const objCounts = {};
-            records.forEach(item => {
-                const label = item.objeto && item.objeto !== '-' ? item.objeto : 'Não Especificado';
-                objCounts[label] = (objCounts[label] || 0) + 1;
+            const canvas = document.getElementById('chartRosca');
+            if (!canvas) return;
+
+            const counts = {};
+            records.forEach(r => {
+                const obj = r.objeto || 'Não Especificado';
+                counts[obj] = (counts[obj] || 0) + 1;
             });
 
-            const labels = Object.keys(objCounts);
-            const dataValues = Object.values(objCounts);
-            const totalCount = records.length;
-
-            const backgroundColors = labels.map((label, index) => getLabelColor(label, index));
-
-            const ctx = document.getElementById('chartRosca').getContext('2d');
+            const labels = Object.keys(counts);
+            const data = Object.values(counts);
+            const bgColors = labels.map((l, idx) => getLabelColor(l, idx));
 
             if (chartRoscaInstance) {
                 chartRoscaInstance.destroy();
             }
 
+            const ctx = canvas.getContext('2d');
             chartRoscaInstance = new Chart(ctx, {
                 type: 'doughnut',
-                plugins: [centerTextPlugin],
                 data: {
                     labels: labels,
                     datasets: [{
-                        data: dataValues,
-                        backgroundColor: backgroundColors,
+                        data: data,
+                        backgroundColor: bgColors,
                         borderWidth: 2,
-                        borderColor: '#ffffff'
+                        borderColor: '#FFFFFF'
                     }]
                 },
                 options: {
@@ -1117,100 +1168,52 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            onClick: () => {}, 
-                            onHover: (event) => {
-                                if (event.native && event.native.target) {
-                                    event.native.target.style.cursor = 'default';
-                                }
-                            },
+                            onClick: null, // <-- Desabilita a ação de clique na legenda
                             labels: {
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const val = context.raw || 0;
-                                    const percentage = totalCount > 0 ? ((val / totalCount) * 100).toFixed(1) : 0;
-                                    return ` ${context.label}: ${val} (${percentage}%)`;
-                                }
+                                boxWidth: 12,
+                                font: { size: 11 }
                             }
                         },
                         centerText: {
-                            value: totalCount
+                            value: records.length
                         }
                     },
-                    cutout: '70%'
-                }
+                    cutout: '65%'
+                },
+                plugins: [centerTextPlugin]
             });
         }
 
-        async function syncGoogleSheets() {
-            const statusEl = document.getElementById('fileStatus');
-            statusEl.textContent = '⏳ Sincronizando dados...';
+        function clearFilters() {
+            const genInput = document.getElementById('filterGeneral');
+            const anoSelect = document.getElementById('filterAno');
+            const objSelect = document.getElementById('filterObjeto');
 
-            try {
-                const response = await fetch(GOOGLE_SHEETS_URL);
-                if (!response.ok) throw new Error('Erro ao acessar a planilha online');
+            if (genInput) genInput.value = '';
+            if (anoSelect) anoSelect.value = '';
+            if (objSelect) objSelect.value = '';
 
-                const text = await response.text();
-                const rows = parseCSV(text);
-
-                if (rows.length < 2) {
-                    throw new Error('Planilha sem dados suficientes.');
-                }
-
-                const headerIdx = findHeaderIndex(rows);
-                const headers = rows[headerIdx];
-                const dataRows = rows.slice(headerIdx + 1);
-
-                let cols = findColIndices(headers);
-
-                if (cols.idxAno === -1) {
-                    cols.idxAno = detectAnoColFallback(dataRows);
-                }
-
-                rawRecords = dataRows.map(row => {
-                    return {
-                        ano: extractAno(cols.idxAno !== -1 ? row[cols.idxAno] : '-'),
-                        cad: cols.idxCad !== -1 ? row[cols.idxCad] : '-',
-                        tit: cols.idxTit !== -1 ? row[cols.idxTit] : '-',
-                        obj: cols.idxObj !== -1 ? row[cols.idxObj] : '-',
-                        comp: cols.idxComp !== -1 ? row[cols.idxComp] : '-',
-                        proc: cols.idxProc !== -1 ? row[cols.idxProc] : '-',
-                        eqp: cols.idxEqp !== -1 ? row[cols.idxEqp] : '-',
-                        objeto: cols.idxObj !== -1 ? row[cols.idxObj] : '-'
-                    };
-                });
-
-                updateFilterOptions();
-                applyFilters();
-
-                const now = new Date();
-                statusEl.textContent = `✅ Atualizado às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-            } catch (err) {
-                console.error(err);
-                statusEl.textContent = '❌ Falha ao sincronizar dados.';
-            }
+            applyFiltersAndRender();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             generateAppIcon();
+            syncGoogleSheets();
+
+            const genInput = document.getElementById('filterGeneral');
+            const anoSelect = document.getElementById('filterAno');
+            const objSelect = document.getElementById('filterObjeto');
+
+            if (genInput) genInput.addEventListener('input', applyFiltersAndRender);
+            if (anoSelect) anoSelect.addEventListener('change', applyFiltersAndRender);
+            if (objSelect) objSelect.addEventListener('change', applyFiltersAndRender);
 
             const cardsContainer = document.getElementById('cardsContainer');
             if (cardsContainer) {
                 cardsContainer.addEventListener('scroll', updateArrowVisibility);
             }
+
             window.addEventListener('resize', updateArrowVisibility);
-
-            document.getElementById('filterGeneral').addEventListener('input', applyFilters);
-            document.getElementById('filterAno').addEventListener('change', applyFilters);
-            document.getElementById('filterObjeto').addEventListener('change', applyFilters);
-
-            syncGoogleSheets();
         });
     </script>
 </body>
