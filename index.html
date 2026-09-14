@@ -20,6 +20,8 @@
             --primary-color: #00563B;
             --secondary-color: #00875A;
             --accent-color: #0066CC;
+            --gmail-color: #EA4335;
+            --whatsapp-color: #25D366;
             --bg-color: #F4F6F8;
             --card-bg: #FFFFFF;
             --text-main: #222222;
@@ -101,6 +103,92 @@
 
         .btn-sync:hover {
             background-color: var(--secondary-color);
+        }
+
+        /* BOTÃO COMPARTILHAR MODERNO */
+        .btn-share {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            letter-spacing: 0.2px;
+            flex-shrink: 0;
+        }
+
+        .btn-share svg {
+            transition: transform 0.25s ease;
+            stroke-width: 2.2px;
+        }
+
+        .btn-share:hover {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 86, 59, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn-share:hover svg {
+            transform: scale(1.12);
+            stroke: #ffffff;
+        }
+
+        /* OPÇÕES DE COMPARTILHAMENTO DENTRO DO MODAL */
+        .btn-share-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-share-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-whatsapp-opt {
+            color: var(--whatsapp-color);
+            border-color: var(--whatsapp-color);
+        }
+        .btn-whatsapp-opt:hover {
+            background-color: var(--whatsapp-color);
+            color: #fff;
+        }
+
+        .btn-gmail-opt {
+            color: var(--gmail-color);
+            border-color: var(--gmail-color);
+        }
+        .btn-gmail-opt:hover {
+            background-color: var(--gmail-color);
+            color: #fff;
+        }
+
+        .btn-copy-opt {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-copy-opt:hover {
+            background-color: var(--primary-color);
+            color: #fff;
         }
 
         .filter-section {
@@ -258,6 +346,10 @@
             width: 100%;
         }
 
+        #chartRosca {
+            cursor: default !important;
+        }
+
         .results-section {
             background: var(--card-bg);
             padding: 20px;
@@ -283,7 +375,7 @@
 
         .card-arrow {
             position: absolute;
-            top: 9%;
+            top: 50%;
             transform: translateY(-50%);
             z-index: 10;
             background-color: var(--primary-color);
@@ -327,10 +419,10 @@
             display: flex;
             gap: 20px;
             overflow-x: auto;
-            padding: 10px 5px 12px 5px;
+            padding: 15px 10px 20px 10px;
             margin-bottom: 0;
             scroll-behavior: smooth;
-            align-items: flex-start;
+            align-items: stretch;
             width: 100%;
         }
 
@@ -346,32 +438,38 @@
             border-radius: 4px;
         }
 
+        /* DATA CARD PADRONIZADO E COM ALTURA FIXA */
         .data-card {
-            flex: 0 0 280px;
-            align-self: flex-start;
-            background: var(--bg-color);
+            flex: 0 0 310px;
+            width: 310px;
+            height: 330px; /* Altura padronizada para evitar estouro */
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-top: 4px solid var(--primary-color);
             border-radius: 8px;
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-bottom: 0;
-            height: auto;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            position: relative;
+            cursor: pointer;
+            z-index: 1;
+            overflow: hidden;
         }
 
         @media (min-width: 480px) {
             .data-card {
-                flex: 0 0 320px;
+                flex: 0 0 330px;
+                width: 330px;
             }
         }
 
         .data-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 86, 59, 0.18);
+            z-index: 10;
         }
 
         .data-card .card-header-badge {
@@ -381,28 +479,45 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
             margin-bottom: 0;
+            flex-shrink: 0;
+            gap: 6px;
         }
 
         .data-card .code-badge {
             font-weight: 700;
-            color: var(--primary-color);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
         }
 
         .data-card .year-badge {
-            background: var(--primary-color);
             color: white;
             font-size: 0.75rem;
             padding: 2px 8px;
             border-radius: 12px;
             font-weight: 600;
+            flex-shrink: 0;
         }
 
+        /* CORPO DO CARD COM ROLAGEM INTERNA EM CASO DE EXCESSO */
         .data-card .card-body {
             display: flex;
             flex-direction: column;
             gap: 8px;
             font-size: 0.85rem;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 4px;
+        }
+
+        .data-card .card-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .data-card .card-body::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
         }
 
         .data-card .card-field {
@@ -422,7 +537,12 @@
         .data-card .card-title {
             font-weight: 700;
             color: var(--text-main);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .no-results {
@@ -476,6 +596,112 @@
             color: var(--accent-color);
             text-decoration: underline;
             word-break: break-all;
+        }
+
+        /* MODAIS CORRIGIDOS PARA NÃO VAZAR/ESTOURAR A TELA */
+        .card-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .card-modal.active {
+            display: flex;
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 620px;
+            width: 100%;
+            max-height: 85vh; /* Limita a altura máxima para caber na tela */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+            border-top: 6px solid var(--primary-color);
+            transform: scale(0.9);
+            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            overflow: hidden;
+        }
+
+        @keyframes popUp {
+            to { transform: scale(1); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+            z-index: 20;
+        }
+
+        .modal-close:hover {
+            color: #ef4444;
+        }
+
+        /* ESTRUTURA INTERNA DO MODAL - CABEÇALHO FIXO E CORPO COM ROLAGEM */
+        #modalBody {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .modal-header-fixed {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+            padding-right: 30px; /* Evita que o botão fechar cubra o conteúdo */
+        }
+
+        .modal-body-scroll {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            font-size: 0.95rem;
+            overflow-y: auto;
+            padding-right: 6px;
+            flex: 1;
+        }
+
+        .modal-body-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body-scroll::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 4px;
+        }
+        .modal-body-scroll::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -539,7 +765,7 @@
             </div>
 
             <div class="results-section">
-                <h2>Deslocamento Lateral --&gt; (<span id="resultsCount">0</span>) Registros</h2>
+                <h2>Passe p/ o Lado --&gt; (<span id="resultsCount">0</span>) Registros</h2>
                 <div class="cards-wrapper">
                     <button class="card-arrow arrow-left" onclick="scrollCards(-1)" aria-label="Anterior">&#10094;</button>
                     <div class="cards-horizontal-container" id="cardsContainer">
@@ -551,7 +777,7 @@
         </div>
 
         <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
-            <p>&copy; Embrapa 2026. Cadastros Sisgen Amapá. ACGOES</p>
+            <p>&copy; Embrapa 2026. Cadastros Sisgen Amapá. (ACGOES)</p>
         </footer>
     </div>
 
@@ -644,6 +870,35 @@
         </div>
     </div>
 
+    <!-- MODAL DE AMPLIAÇÃO DO CARD -->
+    <div id="cardModal" class="card-modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- MODAL UNIFICADO DE COMPARTILHAMENTO -->
+    <div id="shareModal" class="card-modal" onclick="closeShareModal(event)">
+        <div class="modal-content" style="max-width: 420px; text-align: center;" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeShareModal()">&times;</span>
+            <h3 style="margin-bottom: 6px; color: var(--primary-color);">Compartilhar Registro</h3>
+            <p id="shareModalCode" style="font-weight: 700; margin-bottom: 20px; color: var(--text-muted); font-size: 0.9rem;"></p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn-share-option btn-whatsapp-opt" onclick="shareToWhatsApp()">
+                    <span style="font-size: 1.2rem;">💬</span> Enviar pelo WhatsApp
+                </button>
+                <button class="btn-share-option btn-gmail-opt" onclick="shareToGmail()">
+                    <span style="font-size: 1.2rem;">✉️</span> Enviar pelo Gmail
+                </button>
+                <button class="btn-share-option btn-copy-opt" onclick="shareToNativeOrCopy()">
+                    <span style="font-size: 1.2rem;">📋</span> Copiar / Mais Opções
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1dwph8Yrn0Ui2-AjfpJIzHspht7C2CognexrtQvJdI6c/gviz/tq?tqx=out:csv';
 
@@ -661,6 +916,7 @@
 
         let rawRecords = [];
         let chartRoscaInstance = null;
+        let activeShareRecord = null;
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -760,7 +1016,7 @@
                 const { top, bottom, left, right } = chartArea;
 
                 ctx.save();
-                const total = chart.config.options.plugins.centerTextPlugin?.value ?? chart.config.options.plugins.centerText?.value ?? 0;
+                const total = chart.config.options.plugins.centerTextPlugin?.value ?? 0;
 
                 const centerX = (left + right) / 2;
                 const centerY = (top + bottom) / 2;
@@ -891,140 +1147,227 @@
             return bestIndex;
         }
 
-        function processCSVData(rows) {
-            if (!rows || rows.length === 0) return [];
+        function processData(csvRows) {
+            if (!csvRows || csvRows.length < 2) return;
+            const headerIdx = findHeaderIndex(csvRows);
+            const headers = csvRows[headerIdx].map(h => removeAccents(h).trim());
 
-            const headerIdx = findHeaderIndex(rows);
-            const headers = rows[headerIdx].map(h => removeAccents(h).trim());
+            let idxCodigo = headers.findIndex(h => h.includes('codigo') || h.includes('cadastro') || h.includes('registro') || h.includes('num'));
+            let idxAno = headers.findIndex(h => h.includes('ano') || h.includes('data'));
+            
+            let idxTitulo = headers.findIndex(h => h.includes('titulo') || h.includes('atividade') || h.includes('projeto') || h.includes('nome'));
+            let idxObjeto = headers.findIndex(h => h.includes('objeto') || h.includes('modalidade') || h.includes('tipo'));
+            let idxComponente = headers.findIndex(h => h.includes('componente') || h.includes('especie') || h.includes('taxon'));
+            let idxProcedencia = headers.findIndex(h => h.includes('procedencia') || h.includes('origem') || h.includes('local'));
+            let idxEquipe = headers.findIndex(h => h.includes('equipe') || h.includes('responsavel') || h.includes('pesquisador') || h.includes('autor'));
 
-            let codeCol = headers.findIndex(h => /\b(codigo|cadastro|numero|n°|id)\b/.test(h));
-            let yearCol = headers.findIndex(h => /\b(ano|data)\b/.test(h));
-            let projCol = headers.findIndex(h => /\b(projeto|atividade|titulo|nome|descricao)\b/.test(h));
-            let objCol = headers.findIndex(h => /\b(objeto|tipo|categoria|modalidade)\b/.test(h));
-            let compCol = headers.findIndex(h => /\b(componente|especie|taxon|amostra)\b/.test(h));
-            let procCol = headers.findIndex(h => /\b(procedencia|origem|local|municipio)\b/.test(h));
-            let equipeCol = headers.findIndex(h => /\b(equipe|responsavel|pesquisador|autor|coordenador|membros)\b/.test(h));
+            if (idxCodigo === -1) idxCodigo = 0;
+            if (idxObjeto === -1) idxObjeto = 1;
+            if (idxTitulo === -1) idxTitulo = 2;
 
-            if (codeCol === -1) codeCol = 0;
-            if (projCol === -1) projCol = 1;
-            if (objCol === -1) objCol = 2;
+            rawRecords = csvRows.slice(headerIdx + 1).map((row, index) => {
+                const codigo = row[idxCodigo] || `REG-${index+1}`;
+                const ano = idxAno !== -1 ? extractYear(row[idxAno], row) : extractYear('', row);
+                
+                const titulo = idxTitulo !== -1 ? row[idxTitulo] : '';
+                const objeto = idxObjeto !== -1 ? row[idxObjeto] : 'Não Especificado';
+                const componente = idxComponente !== -1 ? row[idxComponente] : '';
+                const procedencia = idxProcedencia !== -1 ? row[idxProcedencia] : '';
+                const equipe = idxEquipe !== -1 ? row[idxEquipe] : '';
 
-            const records = [];
+                return {
+                    id: index,
+                    codigo: codigo,
+                    ano: ano,
+                    titulo: titulo,
+                    objeto: objeto,
+                    componente: componente,
+                    procedencia: procedencia,
+                    equipe: equipe,
+                    fullRow: row
+                };
+            });
 
-            for (let i = headerIdx + 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || row.length === 0 || row.every(c => !c.trim())) continue;
-
-                const code = row[codeCol] || `CAD-${i}`;
-                const rawYear = yearCol !== -1 ? row[yearCol] : '';
-                const year = extractYear(rawYear, row);
-                const projetoAtividade = projCol !== -1 ? row[projCol] : '';
-                const objeto = objCol !== -1 ? row[objCol] : 'Não Especificado';
-                const componente = compCol !== -1 ? row[compCol] : '';
-                const procedencia = procCol !== -1 ? row[procCol] : '';
-                const equipe = equipeCol !== -1 ? row[equipeCol] : '';
-
-                records.push({
-                    code,
-                    year,
-                    projetoAtividade,
-                    objeto,
-                    componente,
-                    procedencia,
-                    equipe,
-                    fullText: removeAccents(row.join(' '))
-                });
-            }
-
-            return records;
+            populateFilterOptions();
+            applyFilters();
         }
 
-        function populateSelects(records) {
+        function populateFilterOptions() {
             const anoSelect = document.getElementById('filterAno');
             const objetoSelect = document.getElementById('filterObjeto');
 
-            const years = [...new Set(records.map(r => r.year))].filter(y => y && y !== 'N/A').sort((a, b) => b - a);
-            const objetos = [...new Set(records.map(r => r.objeto))].filter(Boolean).sort();
-
-            const currentAno = anoSelect.value;
-            const currentObjeto = objetoSelect.value;
+            const years = [...new Set(rawRecords.map(r => r.ano))].filter(Boolean).sort().reverse();
+            const objetos = [...new Set(rawRecords.map(r => r.objeto))].filter(Boolean).sort();
 
             anoSelect.innerHTML = '<option value="">Todos os Anos</option>' + 
                 years.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join('');
 
             objetoSelect.innerHTML = '<option value="">Todos os Objetos</option>' + 
                 objetos.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+        }
 
-            anoSelect.value = currentAno;
-            objetoSelect.value = currentObjeto;
+        function applyFilters() {
+            const q = removeAccents(document.getElementById('filterGeneral').value.trim());
+            const selectedAno = document.getElementById('filterAno').value;
+            const selectedObjeto = document.getElementById('filterObjeto').value;
+
+            const filtered = rawRecords.filter(item => {
+                const matchAno = !selectedAno || item.ano === selectedAno;
+                const matchObjeto = !selectedObjeto || item.objeto === selectedObjeto;
+                
+                let matchText = true;
+                if (q) {
+                    const fullText = removeAccents(Object.values(item).join(' '));
+                    matchText = fullText.includes(q);
+                }
+
+                return matchAno && matchObjeto && matchText;
+            });
+
+            renderCards(filtered);
+            updateChart(filtered);
+            document.getElementById('resultsCount').innerText = filtered.length;
+        }
+
+        function getRecordFormattedText(record) {
+            return [
+                `📋 CADASTRO SISGEN: ${record.codigo} (${record.ano})`,
+                `----------------------------------------`,
+                `1. TÍTULO / ATIVIDADE: ${record.titulo || 'N/A'}`,
+                `2. OBJETO: ${record.objeto || 'Não Especificado'}`,
+                record.componente ? `3. COMPONENTE: ${record.componente}` : null,
+                record.procedencia ? `4. PROCEDÊNCIA: ${record.procedencia}` : null,
+                record.equipe ? `5. EQUIPE: ${record.equipe}` : null
+            ].filter(Boolean).join('\n');
+        }
+
+        function openShareModal(e, id) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            activeShareRecord = rawRecords.find(r => r.id === id);
+            if (!activeShareRecord) return;
+
+            document.getElementById('shareModalCode').innerText = `Cadastro ${activeShareRecord.codigo} (${activeShareRecord.ano})`;
+            document.getElementById('shareModal').classList.add('active');
+        }
+
+        function closeShareModal(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            document.getElementById('shareModal').classList.remove('active');
+        }
+
+        function shareToWhatsApp() {
+            if (!activeShareRecord) return;
+            const text = getRecordFormattedText(activeShareRecord);
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+            closeShareModal();
+        }
+
+        function shareToGmail() {
+            if (!activeShareRecord) return;
+            const subject = `[SisGen] Cadastro ${activeShareRecord.codigo} - ${activeShareRecord.ano}`;
+            const body = getRecordFormattedText(activeShareRecord);
+            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(gmailUrl, '_blank');
+            closeShareModal();
+        }
+
+        function shareToNativeOrCopy() {
+            if (!activeShareRecord) return;
+            const textDetails = getRecordFormattedText(activeShareRecord);
+
+            if (navigator.share) {
+                navigator.share({
+                    title: `SisGen - ${activeShareRecord.codigo}`,
+                    text: textDetails
+                }).catch(err => {
+                    if (err.name !== 'AbortError') console.error(err);
+                });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(textDetails).then(() => {
+                    alert('✅ Dados do card copiados para a área de transferência!');
+                }).catch(() => {
+                    alert('❌ Erro ao copiar os dados.');
+                });
+            } else {
+                alert(textDetails);
+            }
+            closeShareModal();
         }
 
         function renderCards(records) {
             const container = document.getElementById('cardsContainer');
-            if (!container) return;
-
-            if (records.length === 0) {
-                container.innerHTML = '<div class="no-results">Nenhum registro encontrado com os filtros selecionados.</div>';
+            if (!records || records.length === 0) {
+                container.innerHTML = '<div class="no-results">Nenhum registro encontrado.</div>';
+                updateArrowVisibility();
                 return;
             }
 
-            container.innerHTML = records.map(rec => {
-                const color = getLabelColor(rec.objeto, 0);
+            container.innerHTML = records.map(r => {
+                const color = getLabelColor(r.objeto, r.id);
                 return `
-                    <div class="data-card" style="border-top-color: ${color};">
-                        <div class="card-header-badge">
-                            <span class="code-badge" style="color: ${color};">${escapeHtml(rec.code)}</span>
-                            <span class="year-badge" style="background-color: ${color};">${escapeHtml(rec.year)}</span>
-                        </div>
-                        <div class="card-body">
-                            ${rec.projetoAtividade ? `
-                            <div class="card-field">
-                                <span class="card-field-label">PROJETO/ATIVIDADE</span>
-                                <div class="card-title">${escapeHtml(rec.projetoAtividade)}</div>
-                            </div>` : ''}
-
-                            ${rec.objeto ? `
-                            <div class="card-field">
-                                <span class="card-field-label">OBJETO</span>
-                                <div>${escapeHtml(rec.objeto)}</div>
-                            </div>` : ''}
-
-                            ${rec.componente ? `
-                            <div class="card-field">
-                                <span class="card-field-label">COMPONENTE</span>
-                                <div>${escapeHtml(rec.componente)}</div>
-                            </div>` : ''}
-
-                            ${rec.procedencia ? `
-                            <div class="card-field">
-                                <span class="card-field-label">PROCEDÊNCIA</span>
-                                <div>${escapeHtml(rec.procedencia)}</div>
-                            </div>` : ''}
-
-                            ${rec.equipe ? `
-                            <div class="card-field">
-                                <span class="card-field-label">EQUIPE</span>
-                                <div>${escapeHtml(rec.equipe)}</div>
-                            </div>` : ''}
+                <div class="data-card" style="border-top: 4px solid ${color};" onclick="openModal(${r.id})">
+                    <div class="card-header-badge">
+                        <span class="code-badge" style="color: ${color};" title="${escapeHtml(r.codigo)}">${escapeHtml(r.codigo)}</span>
+                        <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+                            <span class="year-badge" style="background-color: ${color};">${escapeHtml(r.ano)}</span>
+                            <button class="btn-share" onclick="openShareModal(event, ${r.id})" title="Compartilhar registro">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                                <span>Compartilhar</span>
+                            </button>
                         </div>
                     </div>
-                `;
+                    <div class="card-body">
+                        <div class="card-field">
+                            <span class="card-field-label">Título / Atividade</span>
+                            <div class="card-title">${escapeHtml(r.titulo || 'N/A')}</div>
+                        </div>
+                        <div class="card-field">
+                            <span class="card-field-label">Objeto</span>
+                            <div style="font-weight: 500;">${escapeHtml(r.objeto || 'Não Especificado')}</div>
+                        </div>
+                        ${r.componente ? `
+                        <div class="card-field">
+                            <span class="card-field-label">Componente</span>
+                            <div>${escapeHtml(r.componente)}</div>
+                        </div>` : ''}
+                        ${r.procedencia ? `
+                        <div class="card-field">
+                            <span class="card-field-label">Procedência</span>
+                            <div>${escapeHtml(r.procedencia)}</div>
+                        </div>` : ''}
+                        ${r.equipe ? `
+                        <div class="card-field">
+                            <span class="card-field-label">Equipe</span>
+                            <div>${escapeHtml(r.equipe)}</div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
             }).join('');
+
+            setTimeout(updateArrowVisibility, 100);
         }
 
         function updateChart(records) {
-            const ctx = document.getElementById('chartRosca');
-            if (!ctx) return;
-
-            const countsByObjeto = {};
+            const counts = {};
             records.forEach(r => {
                 const obj = r.objeto || 'Não Especificado';
-                countsByObjeto[obj] = (countsByObjeto[obj] || 0) + 1;
+                counts[obj] = (counts[obj] || 0) + 1;
             });
 
-            const labels = Object.keys(countsByObjeto);
-            const data = Object.values(countsByObjeto);
-            const bgColors = labels.map((label, idx) => getLabelColor(label, idx));
+            const labels = Object.keys(counts);
+            const data = Object.values(counts);
+            const backgroundColors = labels.map((label, idx) => getLabelColor(label, idx));
+            const total = records.length;
+
+            const ctx = document.getElementById('chartRosca').getContext('2d');
 
             if (chartRoscaInstance) {
                 chartRoscaInstance.destroy();
@@ -1036,57 +1379,51 @@
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: bgColors,
+                        backgroundColor: backgroundColors,
                         borderWidth: 2,
-                        borderColor: '#FFFFFF'
+                        borderColor: '#ffffff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '70%',
+                    events: [],
                     plugins: {
                         legend: {
                             position: 'bottom',
                             onClick: null,
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 11, family: 'Roboto' },
-                                padding: 10
-                            }
+                            labels: { boxWidth: 12, font: { size: 11 } }
                         },
                         tooltip: {
                             enabled: false
                         },
-                        centerText: {
-                            value: records.length
-                        },
-                        centerTextPlugin: {
-                            value: records.length
-                        }
-                    },
-                    cutout: '65%'
+                        centerTextPlugin: { value: total }
+                    }
                 },
                 plugins: [centerTextPlugin]
             });
         }
 
-        function applyFilters() {
-            const term = removeAccents(document.getElementById('filterGeneral').value);
-            const selectedAno = document.getElementById('filterAno').value;
-            const selectedObjeto = document.getElementById('filterObjeto').value;
+        function syncGoogleSheets() {
+            const status = document.getElementById('fileStatus');
+            status.innerText = '⌛ Sincronizando dados...';
 
-            const filtered = rawRecords.filter(rec => {
-                const matchesTerm = !term || rec.fullText.includes(term);
-                const matchesAno = !selectedAno || rec.year === selectedAno;
-                const matchesObjeto = !selectedObjeto || rec.objeto === selectedObjeto;
-
-                return matchesTerm && matchesAno && matchesObjeto;
-            });
-
-            document.getElementById('resultsCount').textContent = filtered.length;
-            renderCards(filtered);
-            updateChart(filtered);
-            setTimeout(updateArrowVisibility, 100);
+            fetch(GOOGLE_SHEETS_URL)
+                .then(res => {
+                    if (!res.ok) throw new Error('Falha ao baixar os dados');
+                    return res.text();
+                })
+                .then(csvText => {
+                    const rows = parseCSV(csvText);
+                    processData(rows);
+                    status.innerText = '✅ Dados sincronizados!';
+                    setTimeout(() => { status.innerText = ''; }, 4000);
+                })
+                .catch(err => {
+                    console.error(err);
+                    status.innerText = '❌ Erro ao carregar dados.';
+                });
         }
 
         function clearFilters() {
@@ -1096,25 +1433,69 @@
             applyFilters();
         }
 
-        async function syncGoogleSheets() {
-            const statusEl = document.getElementById('fileStatus');
-            if (statusEl) statusEl.textContent = '';
+        /* ESTRUTURA REORGANIZADA DO MODAL: TOPO FIXO E CORPO COM SCROLL */
+        function openModal(id) {
+            const record = rawRecords.find(r => r.id === id);
+            if (!record) return;
 
-            try {
-                const response = await fetch(GOOGLE_SHEETS_URL);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const text = await response.text();
-                const rows = parseCSV(text);
-                
-                rawRecords = processCSVData(rows);
-                populateSelects(rawRecords);
-                applyFilters();
+            const modalBody = document.getElementById('modalBody');
+            const color = getLabelColor(record.objeto, record.id);
 
-                if (statusEl) statusEl.textContent = ``;
-            } catch (err) {
-                console.error('Erro ao buscar dados:', err);
-                if (statusEl) statusEl.textContent = '⚠️ Erro ao carregar planilha.';
+            const modalContent = document.querySelector('#cardModal .modal-content');
+            if (modalContent) {
+                modalContent.style.borderTopColor = color;
             }
+
+            modalBody.innerHTML = `
+                <div class="modal-header-fixed">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:1.3rem; font-weight:700; color:${color};">${escapeHtml(record.codigo)}</span>
+                        <span style="background:${color}; color:white; padding:3px 10px; border-radius:16px; font-weight:600; font-size:0.8rem;">${escapeHtml(record.ano)}</span>
+                    </div>
+                    <button class="btn-share" style="padding: 6px 14px; font-size: 0.82rem;" onclick="openShareModal(event, ${record.id})" title="Compartilhar registro">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        <span>Compartilhar</span>
+                    </button>
+                </div>
+                <div class="modal-body-scroll">
+                    <div>
+                        <strong style="display:block; font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Título / Atividade</strong>
+                        <div style="line-height:1.5; font-weight:600;">${escapeHtml(record.titulo || 'N/A')}</div>
+                    </div>
+                    <div>
+                        <strong style="display:block; font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Objeto</strong>
+                        <div style="font-weight:500;">${escapeHtml(record.objeto || 'Não Especificado')}</div>
+                    </div>
+                    ${record.componente ? `
+                    <div>
+                        <strong style="display:block; font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Componente</strong>
+                        <div>${escapeHtml(record.componente)}</div>
+                    </div>` : ''}
+                    ${record.procedencia ? `
+                    <div>
+                        <strong style="display:block; font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Procedência</strong>
+                        <div>${escapeHtml(record.procedencia)}</div>
+                    </div>` : ''}
+                    ${record.equipe ? `
+                    <div>
+                        <strong style="display:block; font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Equipe</strong>
+                        <div>${escapeHtml(record.equipe)}</div>
+                    </div>` : ''}
+                </div>
+            `;
+
+            document.getElementById('cardModal').classList.add('active');
+        }
+
+        function closeModal(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            document.getElementById('cardModal').classList.remove('active');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1124,9 +1505,9 @@
             document.getElementById('filterAno').addEventListener('change', applyFilters);
             document.getElementById('filterObjeto').addEventListener('change', applyFilters);
 
-            const cardsContainer = document.getElementById('cardsContainer');
-            if (cardsContainer) {
-                cardsContainer.addEventListener('scroll', updateArrowVisibility);
+            const container = document.getElementById('cardsContainer');
+            if (container) {
+                container.addEventListener('scroll', updateArrowVisibility);
             }
             window.addEventListener('resize', updateArrowVisibility);
 
