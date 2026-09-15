@@ -16,6 +16,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+      /* --- CONFIGURAÇÃO MOBILE (Padrão) --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "cards"
+        "grafico";
+    gap: 20px;
+}
+
+.results-section {
+    grid-area: cards;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    min-width: 0;
+}
+
+.chart-section {
+    grid-area: grafico;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    height: 100%;
+    position: relative;
+    min-width: 0;
+}
+
+/* --- CONFIGURAÇÃO DESKTOP (Telas a partir de 992px) --- */
+@media (min-width: 992px) {
+    .dashboard-grid {
+        grid-template-columns: 360px 1fr; /* Coluna do Gráfico (360px) + Coluna dos Cards (resto) */
+        grid-template-areas:
+            "grafico cards"; /* Gráfico na ESQUERDA, Cards na DIREITA */
+        align-items: start;
+    }
+}
         :root {
             --primary-color: #00563B;
             --secondary-color: #00875A;
@@ -443,7 +482,7 @@
         .data-card {
             flex: 0 0 310px;
             width: 310px;
-            height: 363px; /* Aumentado 10% (de 330px para 363px) */
+            height: 370px; /* Aumentado 10% (de 330px para 370px) */
             background: var(--data-card-bg); /* Fundo cinza claro */
             border: 1px solid var(--border-color);
             border-top: 4px solid var(--primary-color);
@@ -778,8 +817,8 @@
         </div>
 
         <footer style="position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 0.75rem; background-color: #ffffff; padding: 10px 0; z-index: 1000;">
-        <p style="margin: 0;">&copy; Embrapa 2026. Cadastros Sisgen Amapá. (ACGOES)</p>
-        </footer>
+    <p style="margin: 0;">&copy; Embrapa 2026. Cadastros Sisgen Amapá. (ACGOES)</p>
+</footer>
     </div>
 
     <div id="faqTabView" style="display: none;">
