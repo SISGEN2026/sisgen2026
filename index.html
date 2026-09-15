@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SisGen">
     <meta name="theme-color" content="#00563B">
-  
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -24,6 +24,7 @@
             --whatsapp-color: #25D366;
             --bg-color: #F4F6F8;
             --card-bg: #FFFFFF;
+            --data-card-bg: #F8FAFC; /* Cinza claro suave para o fundo dos cards */
             --text-main: #222222;
             --text-muted: #555555;
             --border-color: #D1D5DB;
@@ -107,8 +108,8 @@
 
         /* BOTÃO COMPARTILHAR MODERNO */
         .btn-share {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
             color: #475569;
             border-radius: 20px;
             padding: 4px 10px;
@@ -438,12 +439,12 @@
             border-radius: 4px;
         }
 
-        /* DATA CARD PADRONIZADO E COM ALTURA FIXA */
+        /* DATA CARD PADRONIZADO - ALTURA AUMENTADA EM 10% (363px) E FUNDO CINZA CLARO */
         .data-card {
             flex: 0 0 310px;
             width: 310px;
-            height: 330px; /* Altura padronizada para evitar estouro */
-            background: var(--card-bg);
+            height: 363px; /* Aumentado 10% (de 330px para 363px) */
+            background: var(--data-card-bg); /* Fundo cinza claro */
             border: 1px solid var(--border-color);
             border-top: 4px solid var(--primary-color);
             border-radius: 8px;
@@ -451,7 +452,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
             transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
             position: relative;
             cursor: pointer;
@@ -631,7 +632,7 @@
             padding: 24px;
             max-width: 620px;
             width: 100%;
-            max-height: 85vh; /* Limita a altura máxima para caber na tela */
+            max-height: 85vh;
             display: flex;
             flex-direction: column;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
@@ -679,7 +680,7 @@
             padding-bottom: 12px;
             margin-bottom: 14px;
             flex-shrink: 0;
-            padding-right: 30px; /* Evita que o botão fechar cubra o conteúdo */
+            padding-right: 30px;
         }
 
         .modal-body-scroll {
@@ -765,7 +766,7 @@
             </div>
 
             <div class="results-section">
-                <h2>Passe p/ o Lado --&gt; <span id="resultsCount">0</span> Registros</h2>
+                <h2>Passar p/ o Lado --&gt; (<span id="resultsCount">0</span>) Registros</h2>
                 <div class="cards-wrapper">
                     <button class="card-arrow arrow-left" onclick="scrollCards(-1)" aria-label="Anterior">&#10094;</button>
                     <div class="cards-horizontal-container" id="cardsContainer">
@@ -777,7 +778,7 @@
         </div>
 
         <footer style="text-align: center; font-size: 0.75rem; margin-top: 20px;">
-            <p>&copy; Embrapa 2026. Cadastros Sisgen Amapá. (ACGOES)</p>
+            <p>&copy; Embrapa 2026. Cadastros Sisgen Amapá. ACGOES</p>
         </footer>
     </div>
 
@@ -1231,13 +1232,13 @@
 
         function getRecordFormattedText(record) {
             return [
-                `📋 CADASTRO SISGEN: ${record.codigo} (${record.ano})`,
-                `----------------------------------------`,
-                `1. TÍTULO / ATIVIDADE: ${record.titulo || 'N/A'}`,
-                `2. OBJETO: ${record.objeto || 'Não Especificado'}`,
-                record.componente ? `3. COMPONENTE: ${record.componente}` : null,
-                record.procedencia ? `4. PROCEDÊNCIA: ${record.procedencia}` : null,
-                record.equipe ? `5. EQUIPE: ${record.equipe}` : null
+                `📋 𝗖𝗔𝗗𝗔𝗦𝗧𝗥𝗢 𝗦𝗜𝗦𝗚𝗘𝗡: ${record.codigo} (${record.ano})`,
+                `-------------------`,
+                `𝗧𝗜́𝗧𝗨𝗟𝗢 / 𝗔𝗧𝗜𝗩𝗜𝗗𝗔𝗗𝗘: ${record.titulo || 'N/A'}`,
+                `𝗢𝗕𝗝𝗘𝗧𝗢: ${record.objeto || 'Não Especificado'}`,
+                record.componente ? `𝗖𝗢𝗠𝗣𝗢𝗡𝗘𝗡𝗧𝗘: ${record.componente}` : null,
+                record.procedencia ? `𝗣𝗥𝗢𝗖𝗘𝗗𝗘̂𝗡𝗖𝗜𝗔: ${record.procedencia}` : null,
+                record.equipe ? `𝗘𝗤𝗨𝗜𝗣𝗘: ${record.equipe}` : null
             ].filter(Boolean).join('\n');
         }
 
@@ -1433,7 +1434,6 @@
             applyFilters();
         }
 
-        /* ESTRUTURA REORGANIZADA DO MODAL: TOPO FIXO E CORPO COM SCROLL */
         function openModal(id) {
             const record = rawRecords.find(r => r.id === id);
             if (!record) return;
