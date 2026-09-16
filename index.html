@@ -1,4 +1,44 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Aplicativo Dashboard Offline</title>
+  
+  <!-- Estilos e Ícones Externos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* --- BARRA DE STATUS OFFLINE --- */
+    #alerta-offline {
+      display: none;
+      background: #ff9800;
+      color: #ffffff;
+      text-align: center;
+      padding: 8px 15px;
+      font-weight: bold;
+      font-size: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .status-badge.online { background: #e8f5e9; color: #2e7d32; }
+    .status-badge.offline { background: #ffebee; color: #c62828; }
+
+    /* ==========================================================================
+       <!DOCTYPE HTML>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -1553,5 +1593,239 @@
             syncGoogleSheets();
         });
     </script>
+</body>
+</html>
+
+       ========================================================================== */
+
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f6f9; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+    .card { background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .loading { text-align: center; padding: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <!-- Alerta Fixo Quando Estiver em Modo Offline -->
+  <div id="alerta-offline"></div>
+
+  <div class="container">
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h1>Dashboard de Dados</h1>
+      <!-- Badge do Status da Conexão -->
+      <div id="status-conexao" class="status-badge online">
+        <i class="fas fa-wifi"></i> Online
+      </div>
+    </header>
+
+    <!-- Área de Filtros -->
+    <div class="filters">
+      <!-- Exemplo de Filtro -->
+      <select id="filtro-categoria" onchange="aplicarFiltros()">
+        <option value="todos">Todas as Categorias</option>
+      </select>
+      <button onclick="carregarDados()"><i class="fas fa-sync"></i> Atualizar Dados</button>
+    </div>
+
+    <!-- Indicador de Carregamento -->
+    <div id="loading" class="loading" style="display: none;">
+      <i class="fas fa-spinner fa-spin"></i> Carregando informações...
+    </div>
+
+    <!-- Gráfico -->
+    <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <canvas id="meuGrafico" height="100"></canvas>
+    </div>
+
+    <!-- Grid de Cards -->
+    <div id="container-cards" class="card-grid"></div>
+  </div>
+
+  <script>
+    // --- CONFIGURAÇÕES DO GOOGLE SHEETS E CACHE ---
+    const CONFIG = {
+      // Substitua pelo link CSV da sua planilha no Google Sheets
+      sheetUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR.../pub?output=csv',
+      cacheKey: 'app_dados_offline_v1',
+      cacheTimeKey: 'app_dados_ultima_atualizacao'
+    };
+
+    let dadosGlobais = [];
+    let meuGraficoInstance = null;
+
+    // 1. REGISTRO DO SERVICE WORKER PARA SUPORTE OFFLINE COMPLETO
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('Service Worker ativado para funcionamento offline!'))
+          .catch(err => console.error('Erro ao registrar Service Worker:', err));
+      });
+    }
+
+    // 2. MONITORAMENTO DA CONEXÃO COM A INTERNET
+    window.addEventListener('online', () => atualizarStatusRede(true));
+    window.addEventListener('offline', () => atualizarStatusRede(false));
+
+    function atualizarStatusRede(online) {
+      const statusEl = document.getElementById('status-conexao');
+      if (online) {
+        statusEl.className = 'status-badge online';
+        statusEl.innerHTML = '<i class="fas fa-wifi"></i> Online';
+        ocultarAvisoOffline();
+        carregarDados(); // Sincroniza os dados mais recentes automaticamente
+      } else {
+        statusEl.className = 'status-badge offline';
+        statusEl.innerHTML = '<i class="fas fa-wifi-slash"></i> Offline (Modo Cache)';
+      }
+    }
+
+// --- CARREGAMENTO DE DADOS COM TRATAMENTO OFFLINE SEM POP-UP ---
+async function carregarDados() {
+  mostrarLoading(true);
+
+  try {
+    // Tenta buscar da internet (Google Sheets)
+    const response = await fetch(CONFIG.sheetUrl);
+    if (!response.ok) throw new Error("Falha ao buscar dados na rede");
+
+    const textoCSV = await response.text();
+    const dados = processarCSV(textoCSV);
+
+    // Salva no LocalStorage para uso offline
+    localStorage.setItem(CONFIG.cacheKey, JSON.stringify(dados));
+    localStorage.setItem(CONFIG.cacheTimeKey, new Date().toLocaleString('pt-BR'));
+
+    dadosGlobais = dados;
+    ocultarAvisoOffline();
+    renderizarAplicacao(dadosGlobais);
+
+  } catch (error) {
+    console.warn("Sem conexão ou erro de rede. Tentando carregar cache local...", error);
+
+    // Tenta carregar do armazenamento local
+    const dadosSalvos = localStorage.getItem(CONFIG.cacheKey);
+    const ultimaAtualizacao = localStorage.getItem(CONFIG.cacheTimeKey);
+
+    if (dadosSalvos) {
+      dadosGlobais = JSON.parse(dadosSalvos);
+      renderizarAplicacao(dadosGlobais);
+      mostrarAvisoOffline(`Modo Offline: Exibendo dados de ${ultimaAtualizacao || 'Data desconhecida'}`);
+    } else {
+      // EM VEZ DO ALERT(), EXIBE UMA MENSAGEM SUAVE NA TELA
+      mostrarAvisoOffline("Atenção: Você está sem internet e ainda não há dados salvos para exibição offline. Conecte-se à rede uma vez para sincronizar.");
+    }
+  } finally {
+    mostrarLoading(false);
+  }
+}
+
+    // 4. PARSER DE CSV PARA OBJETOS JSON
+    function processarCSV(csv) {
+      const linhas = csv.split('\n').filter(r => r.trim() !== '');
+      if (linhas.length === 0) return [];
+
+      const cabecalhos = linhas[0].split(',').map(c => c.trim().replace(/^"(.*)"$/, '$1'));
+      
+      return linhas.slice(1).map(linha => {
+        const valores = linha.split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
+        let objeto = {};
+        cabecalhos.forEach((header, index) => {
+          objeto[header] = valores[index] || '';
+        });
+        return objeto;
+      });
+    }
+
+    // ==========================================================================
+    // [COLE AQUI AS SUAS FUNÇÕES DE RENDERIZAÇÃO E FILTROS DAS SUAS 1557 LINHAS]
+    // ==========================================================================
+
+    function renderizarAplicacao(dados) {
+      renderizarCards(dados);
+      renderizarGrafico(dados);
+    }
+
+    function renderizarCards(dados) {
+      const container = document.getElementById('container-cards');
+      container.innerHTML = '';
+
+      if (dados.length === 0) {
+        container.innerHTML = '<p>Nenhum registro encontrado.</p>';
+        return;
+      }
+
+      dados.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        // Ajuste com os nomes dos seus campos CSV
+        card.innerHTML = `
+          <h3>${item.Nome || item.Titulo || 'Item'}</h3>
+          <p>${item.Descricao || item.Categoria || ''}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderizarGrafico(dados) {
+      const ctx = document.getElementById('meuGrafico').getContext('2d');
+      
+      if (meuGraficoInstance) {
+        meuGraficoInstance.destroy();
+      }
+
+      // Exemplo simples de contagem por categoria para o gráfico
+      const categorias = {};
+      dados.forEach(d => {
+        const cat = d.Categoria || 'Outros';
+        categorias[cat] = (categorias[cat] || 0) + 1;
+      });
+
+      meuGraficoInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(categorias),
+          datasets: [{
+            label: 'Quantidade',
+            data: Object.values(categorias),
+            backgroundColor: '#3f51b5'
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    function aplicarFiltros() {
+      const valor = document.getElementById('filtro-categoria').value;
+      if (valor === 'todos') {
+        renderizarAplicacao(dadosGlobais);
+      } else {
+        const filtrados = dadosGlobais.filter(d => d.Categoria === valor);
+        renderizarAplicacao(filtrados);
+      }
+    }
+
+    // FUNÇÕES AUXILIARES DE UI
+    function mostrarLoading(exibir) {
+      document.getElementById('loading').style.display = exibir ? 'block' : 'none';
+    }
+
+    function mostrarAvisoOffline(msg) {
+      const alerta = document.getElementById('alerta-offline');
+      alerta.innerText = msg;
+      alerta.style.display = 'block';
+    }
+
+    function ocultarAvisoOffline() {
+      document.getElementById('alerta-offline').style.display = 'none';
+    }
+
+    // Inicializa ao carregar a página
+    document.addEventListener('DOMContentLoaded', () => {
+      atualizarStatusRede(navigator.onLine);
+      carregarDados();
+    });
+  </script>
 </body>
 </html>
