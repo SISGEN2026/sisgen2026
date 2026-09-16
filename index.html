@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Aplicativo Dashboard Offline</title>
+  <title>Sisgen Embrapa Amapá</title>
   
   <!-- Estilos e Ícones Externos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1596,14 +1596,6 @@
 </body>
 </html>
 
-       ========================================================================== */
-
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f6f9; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
-    .card { background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .loading { text-align: center; padding: 20px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -1611,23 +1603,9 @@
   <!-- Alerta Fixo Quando Estiver em Modo Offline -->
   <div id="alerta-offline"></div>
 
-  <div class="container">
-    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h1>Dashboard de Dados</h1>
-      <!-- Badge do Status da Conexão -->
-      <div id="status-conexao" class="status-badge online">
-        <i class="fas fa-wifi"></i> Online
-      </div>
-    </header>
 
-    <!-- Área de Filtros -->
-    <div class="filters">
-      <!-- Exemplo de Filtro -->
-      <select id="filtro-categoria" onchange="aplicarFiltros()">
-        <option value="todos">Todas as Categorias</option>
-      </select>
-      <button onclick="carregarDados()"><i class="fas fa-sync"></i> Atualizar Dados</button>
-    </div>
+
+
 
     <!-- Indicador de Carregamento -->
     <div id="loading" class="loading" style="display: none;">
@@ -1701,25 +1679,7 @@ async function carregarDados() {
     ocultarAvisoOffline();
     renderizarAplicacao(dadosGlobais);
 
-  } catch (error) {
-    console.warn("Sem conexão ou erro de rede. Tentando carregar cache local...", error);
 
-    // Tenta carregar do armazenamento local
-    const dadosSalvos = localStorage.getItem(CONFIG.cacheKey);
-    const ultimaAtualizacao = localStorage.getItem(CONFIG.cacheTimeKey);
-
-    if (dadosSalvos) {
-      dadosGlobais = JSON.parse(dadosSalvos);
-      renderizarAplicacao(dadosGlobais);
-      mostrarAvisoOffline(`Modo Offline: Exibendo dados de ${ultimaAtualizacao || 'Data desconhecida'}`);
-    } else {
-      // EM VEZ DO ALERT(), EXIBE UMA MENSAGEM SUAVE NA TELA
-      mostrarAvisoOffline("Atenção: Você está sem internet e ainda não há dados salvos para exibição offline. Conecte-se à rede uma vez para sincronizar.");
-    }
-  } finally {
-    mostrarLoading(false);
-  }
-}
 
     // 4. PARSER DE CSV PARA OBJETOS JSON
     function processarCSV(csv) {
