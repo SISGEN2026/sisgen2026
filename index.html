@@ -1121,10 +1121,11 @@
                 alert('Nenhum registro encontrado nos filtros para gerar o relatório.');
                 return;
             }
+            const reportWindow = window.open('', '_blank');
             if (window.jspdf && window.jspdf.jsPDF) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({
-                    orientation: 'portrait',
+                    orientation: 'landscape',
                     unit: 'mm',
                     format: 'a4'
                 });
@@ -1134,10 +1135,10 @@
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
-                doc.text('Cadastro Sisgen da Embrapa Amapá', 15, 20);
+                doc.text('Cadastro Sisgen da Embrapa Amapá', 15, 18);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(11);
-                doc.text('Relatório de Pesquisa', 15, 26);
+                doc.text('Relatório de Pesquisa', 15, 24);
 
                 const tableColumns = ['Código', 'Ano', 'Título', 'Objeto', 'Componente', 'Procedência', 'Equipe'];
                 const tableRows = filteredRecords.map(r => [
@@ -1151,8 +1152,8 @@
                 ]);
 
                 doc.autoTable({
-                    startY: 31,
-                    margin: { top: 20, right: 15, bottom: 20, left: 15 },
+                    startY: 29,
+                    margin: { top: 18, right: 15, bottom: 18, left: 15 },
                     head: [tableColumns],
                     body: tableRows,
                     theme: 'grid',
@@ -1178,22 +1179,66 @@
                         lineWidth: 0.2
                     },
                     columnStyles: {
-                        0: { cellWidth: 24, halign: 'center' },
-                        1: { cellWidth: 14, halign: 'center' },
-                        2: { cellWidth: 42, halign: 'left' },
-                        3: { cellWidth: 28, halign: 'left' },
-                        4: { cellWidth: 26, halign: 'left' },
-                        5: { cellWidth: 23, halign: 'left' },
-                        6: { cellWidth: 23, halign: 'left' }
+                        0: { cellWidth: 28, halign: 'center' },
+                        1: { cellWidth: 16, halign: 'center' },
+                        2: { cellWidth: 68, halign: 'left' },
+                        3: { cellWidth: 42, halign: 'left' },
+                        4: { cellWidth: 39, halign: 'left' },
+                        5: { cellWidth: 37, halign: 'left' },
+                        6: { cellWidth: 37, halign: 'left' }
                     }
                 });
 
                 const pdfBlob = doc.output('blob');
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                window.open(pdfUrl, '_blank');
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                if (reportWindow) {
+                    if (isMobile) {
+                        reportWindow.location.href = pdfUrl;
+                    } else {
+                        reportWindow.document.open();
+                        reportWindow.document.write(`
+                            <!DOCTYPE HTML>
+                            <html lang="pt-BR">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>Relatório de Pesquisa - Cadastro Sisgen da Embrapa Amapá</title>
+                                <style>
+                                    html, body {
+                                        margin: 0;
+                                        padding: 0;
+                                        width: 100%;
+                                        height: 100%;
+                                        overflow: hidden;
+                                        background-color: #525659;
+                                    }
+                                    iframe {
+                                        width: 100%;
+                                        height: 100%;
+                                        border: none;
+                                        display: block;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <iframe src="${pdfUrl}" title="Relatório de Pesquisa - Cadastro Sisgen da Embrapa Amapá"></iframe>
+                            </body>
+                            </html>
+                        `);
+                        reportWindow.document.close();
+                    }
+                } else {
+                    const link = document.createElement('a');
+                    link.href = pdfUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
             } else {
-                const printWindow = window.open('', '_blank');
-                if (!printWindow) {
+                if (!reportWindow) {
                     alert('Por favor, permita pop-ups no navegador para abrir o relatório em PDF.');
                     return;
                 }
@@ -1208,14 +1253,15 @@
                         <td>${escapeHtml(r.equipe || '')}</td>
                     </tr>
                 `).join('');
-                printWindow.document.write(`
+                reportWindow.document.open();
+                reportWindow.document.write(`
                     <!DOCTYPE HTML>
                     <html lang="pt-BR">
                     <head>
                         <meta charset="UTF-8">
                         <title>Relatório de Pesquisa - Cadastro Sisgen da Embrapa Amapá</title>
                         <style>
-                            @page { size: A4 portrait; margin: 20mm 15mm; }
+                            @page { size: A4 landscape; margin: 15mm; }
                             body { font-family: Arial, sans-serif; color: #000; font-size: 10pt; }
                             h1 { font-size: 12pt; font-weight: bold; margin: 0 0 4px 0; }
                             p { font-size: 11pt; margin: 0 0 12px 0; }
@@ -1245,7 +1291,7 @@
                     </body>
                     </html>
                 `);
-                printWindow.document.close();
+                reportWindow.document.close();
             }
         }
         function getRecordFormattedText(record) {
