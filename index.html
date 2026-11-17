@@ -1147,6 +1147,22 @@
                 alert('Nenhum registro encontrado nos filtros para gerar o relatório.');
                 return;
             }
+            const generalInput = document.getElementById('filterGeneral').value.trim();
+            const selectedAno = document.getElementById('filterAno').value;
+            const selectedObjeto = document.getElementById('filterObjeto').value;
+            const searchedConditions = [];
+            if (generalInput) {
+                searchedConditions.push(`Pesquisa Geral: ${generalInput}`);
+            }
+            if (selectedAno) {
+                searchedConditions.push(`Ano: ${selectedAno}`);
+            }
+            if (selectedObjeto) {
+                searchedConditions.push(`Objeto: ${selectedObjeto}`);
+            }
+            const reportSubtitle = searchedConditions.length > 0
+                ? `Relatório: ${searchedConditions.join(' & ')}`
+                : 'Relatório: Todos os registros';
             const reportWindow = window.open('', '_blank');
             if (window.jspdf && window.jspdf.jsPDF) {
                 const { jsPDF } = window.jspdf;
@@ -1156,15 +1172,17 @@
                     format: 'a4'
                 });
                 doc.setProperties({
-                    title: 'Relatório de Pesquisa - Cadastro Sisgen da Embrapa Amapá'
+                    title: 'Relatório de Pesquisa - Cadastros no Sisgen da Embrapa Amapá'
                 });
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
-                doc.text('Cadastro Sisgen da Embrapa Amapá', 15, 18);
+                doc.text('Cadastros no Sisgen da Embrapa Amapá', 15, 18);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(11);
-                doc.text('Relatório de Pesquisa', 15, 24);
+                const subtitleLines = doc.splitTextToSize(reportSubtitle, 267);
+                doc.text(subtitleLines, 15, 24);
+                const tableStartY = 24 + (subtitleLines.length * 5);
                 const tableColumns = ['Código', 'Ano', 'Título', 'Objeto', 'Componente', 'Procedência', 'Equipe'];
                 const tableRows = filteredRecords.map(r => [
                     r.codigo || '',
@@ -1176,7 +1194,7 @@
                     r.equipe || ''
                 ]);
                 doc.autoTable({
-                    startY: 29,
+                    startY: tableStartY,
                     margin: { top: 18, right: 15, bottom: 18, left: 15 },
                     head: [tableColumns],
                     body: tableRows,
@@ -1294,8 +1312,8 @@
                         </style>
                     </head>
                     <body>
-                        <h1>Cadastro Sisgen da Embrapa Amapá</h1>
-                        <p>Relatório de Pesquisa</p>
+                        <h1>Cadastros no Sisgen da Embrapa Amapá</h1>
+                        <p>${escapeHtml(reportSubtitle)}</p>
                         <table>
                             <thead>
                                 <tr>
