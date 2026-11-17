@@ -1161,8 +1161,8 @@
                 searchedConditions.push(`Objeto: ${selectedObjeto}`);
             }
             const reportSubtitle = searchedConditions.length > 0
-                ? `Relatório: ${searchedConditions.join(' & ')}`
-                : 'Relatório: Todos os registros';
+                ? `Relatório ${searchedConditions.join(' & ')}`
+                : 'Relatório Todos os registros';
             const reportWindow = window.open('', '_blank');
             if (window.jspdf && window.jspdf.jsPDF) {
                 const { jsPDF } = window.jspdf;
